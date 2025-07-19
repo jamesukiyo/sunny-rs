@@ -1,0 +1,2 @@
+- Ratatui for nice ui
+- Icons for weather types
