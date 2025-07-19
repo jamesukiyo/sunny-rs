@@ -62,8 +62,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	}
 
 	let output = Output {
-		temp_c: res.main.temp.round().sub(273.0) as i64,
-		feels_like_c: res.main.feels_like.round().sub(273.0) as i64,
+		temp_c: res.main.temp.sub(273.15).round() as i64,
+		feels_like_c: res.main.feels_like.sub(273.15).round() as i64,
 		humidity: res.main.humidity,
 		type_of: res.weather[0].main.clone(),
 		description: res.weather[0].description.clone(),
