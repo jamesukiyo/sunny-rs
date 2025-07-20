@@ -1,10 +1,29 @@
 [package]
-name = "sunny-rs"
+name = "sunny"
 version = "0.1.0"
+authors = ["James Plummer <jamesp2001@live.co.uk>"]
+categories = ["command-line-utilities"]
 edition = "2024"
+description = "Check the weather from your terminal."
+
+[[bin]]
+name = "sunny"
+path = "src/main.rs"
+
+[lints.clippy]
+unwrap_used = "deny"
 
 [dependencies]
 clap = { version = "4.5", features = ["derive"] }
-reqwest = { version = "0.12", features = ["json"] }
+colored = "3.0"
+reqwest = { version = "0.12", features = ["json", "blocking"] }
 serde = { version = "1.0", features = ["derive"] }
 tokio = { version = "1.46", features = ["full"] }
+
+[profile.release]
+opt-level = "z"
+debug = false
+strip = "symbols"
+lto = "fat"
+codegen-units = 1
+panic = "abort"

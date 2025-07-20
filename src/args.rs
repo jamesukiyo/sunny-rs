@@ -11,4 +11,12 @@ pub struct Args {
 	/// Simpler output
 	#[arg(short = 's', long = "simple")]
 	pub simple: bool,
+
+	/// Raw json output
+	#[arg(long = "raw")]
+	pub raw: bool,
+
+	/// API key
+	#[arg(short = 'k', long = "key", default_value = "OPEN_WEATHER_API_KEY")]
+	pub key: String,
 }
