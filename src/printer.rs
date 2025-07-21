@@ -1,8 +1,14 @@
+use std::ops::{Add, Div, Mul};
+
 use super::Output;
 use colored::Colorize;
 
+fn get_fahrenheit(temp: i64) -> i64 {
+	temp.mul(9).div(5).add(32)
+}
+
 #[rustfmt::skip]
-pub fn printer(raw: bool, simple: bool, output: &Output) {
+pub fn printer(raw: bool, simple: bool, fahrenheit: bool, output: &Output) {
 	// colour palette
     let c = [
         (255, 255, 0),   // bright sunny yellow
@@ -28,13 +34,19 @@ pub fn printer(raw: bool, simple: bool, output: &Output) {
         _ => "?",
     };
 
+    let (temp_display, feels_like_display, unit) = if fahrenheit {
+        (get_fahrenheit(output.temp), get_fahrenheit(output.feels_like), "°F")
+    } else {
+        (output.temp, output.feels_like, "°C")
+    };
+
 	if raw {
 		print!("{output:?}")
 	} else if simple {
 		println!("\nsunny-rs\n");
 		println!("{}, {} {}", output.city, output.country, weather_icon);
-		println!("Temperature: {}°C", output.temp_c);
-		println!("Feels like: {}°C", output.feels_like_c);
+		println!("Temperature: {}{}", temp_display, unit);
+		println!("Feels like: {}{}", feels_like_display, unit);
 		println!("Humidity: {}%", output.humidity);
 		println!("Weather: {}", output.type_of.to_lowercase());
 		println!("Description: {}", output.description);
@@ -49,9 +61,9 @@ pub fn printer(raw: bool, simple: bool, output: &Output) {
 		// blank
 		println!("{}", format!("│{: ^40}│", "").truecolor(c[3].0, c[3].1, c[3].2));
 		// temperature
-		println!("{}{}{}", "│   ".truecolor(c[4].0, c[4].1, c[4].2), format!("{:12} {:>21}   ", "Temperature:".white(), format!("{}°C",   output.temp_c)                .truecolor(c[4].0, c[4].1, c[4].2)), "│".truecolor(c[4].0, c[4].1, c[4].2));
+		println!("{}{}{}", "│   ".truecolor(c[4].0, c[4].1, c[4].2), format!("{:12} {:>21}   ", "Temperature:".white(), format!("{}{}",   temp_display, unit)                .truecolor(c[4].0, c[4].1, c[4].2)), "│".truecolor(c[4].0, c[4].1, c[4].2));
 		// feels like
-		println!("{}{}{}", "│   ".truecolor(c[5].0, c[5].1, c[5].2), format!("{:12} {:>21}   ", "Feels like:".white(),  format!("{}°C",   output.feels_like_c)          .truecolor(c[5].0, c[5].1, c[5].2)), "│".truecolor(c[5].0, c[5].1, c[5].2));
+		println!("{}{}{}", "│   ".truecolor(c[5].0, c[5].1, c[5].2), format!("{:12} {:>21}   ", "Feels like:".white(),  format!("{}{}",   feels_like_display, unit)          .truecolor(c[5].0, c[5].1, c[5].2)), "│".truecolor(c[5].0, c[5].1, c[5].2));
 		// humidity
 		println!("{}{}{}", "│   ".truecolor(c[6].0, c[6].1, c[6].2), format!("{:12} {:>21}   ", "Humidity:".white(),    format!("{}%",    output.humidity)              .truecolor(c[6].0, c[6].1, c[6].2)), "│".truecolor(c[6].0, c[6].1, c[6].2));
 		// weather

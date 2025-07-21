@@ -44,8 +44,8 @@ struct Sys {
 struct Output {
 	country: String,
 	city: String,
-	temp_c: String,
-	feels_like_c: String,
+	temp: i64,
+	feels_like: i64,
 	humidity: String,
 	type_of: String,
 	description: String,
@@ -73,15 +73,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let output = Output {
 		country: res.sys.country,
 		city: capitalize(&res.name),
-		temp_c: res.main.temp.sub(273.15).round().to_string(),
-		feels_like_c: res.main.feels_like.sub(273.15).round().to_string(),
+		temp: res.main.temp.sub(273.15).round() as i64,
+		feels_like: res.main.feels_like.sub(273.15).round() as i64,
 		humidity: res.main.humidity.to_string(),
 		type_of: res.weather[0].main.clone(),
 		description: res.weather[0].description.clone(),
 		icon: res.weather[0].icon.clone(),
 	};
 
-	printer(args.raw, args.simple, &output);
+	printer(args.raw, args.simple, args.fahrenheit, &output);
 	Ok(())
 }
 

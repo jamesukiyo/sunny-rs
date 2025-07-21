@@ -8,15 +8,19 @@ pub struct Args {
 	#[arg(index = 1, required = true)]
 	pub city: String,
 
-	/// Simpler output
+	/// Simpler output (no colours)
 	#[arg(short = 's', long = "simple")]
 	pub simple: bool,
 
-	/// Raw json output
+	/// Raw JSON output
 	#[arg(long = "raw")]
 	pub raw: bool,
 
-	/// API key
+	/// API key for OpenWeatherMap
 	#[arg(short = 'k', long = "key", default_value = "OPEN_WEATHER_API_KEY")]
 	pub key: String,
+
+	/// Use fahrenheit for temperature
+	#[arg(short = 'f', long = "fahrenheit")]
+	pub fahrenheit: bool,
 }
