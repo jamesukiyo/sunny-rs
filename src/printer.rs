@@ -40,13 +40,14 @@ pub fn printer(raw: bool, simple: bool, fahrenheit: bool, output: &Output) {
         (output.temp, output.feels_like, "°C")
     };
 
+	#[allow(clippy::format_in_format_args)]
 	if raw {
-		print!("{output:?}")
+		print!("{output:?}");
 	} else if simple {
 		println!("\nsunny-rs\n");
 		println!("{}, {} {}", output.city, output.country, weather_icon);
-		println!("Temperature: {}{}", temp_display, unit);
-		println!("Feels like: {}{}", feels_like_display, unit);
+		println!("Temperature: {temp_display}{unit}");
+		println!("Feels like: {feels_like_display}{unit}");
 		println!("Humidity: {}%", output.humidity);
 		println!("Weather: {}", output.type_of.to_lowercase());
 		println!("Description: {}", output.description);
@@ -61,9 +62,9 @@ pub fn printer(raw: bool, simple: bool, fahrenheit: bool, output: &Output) {
 		// blank
 		println!("{}", format!("│{: ^40}│", "").truecolor(c[3].0, c[3].1, c[3].2));
 		// temperature
-		println!("{}{}{}", "│   ".truecolor(c[4].0, c[4].1, c[4].2), format!("{:12} {:>21}   ", "Temperature:".white(), format!("{}{}",   temp_display, unit)                .truecolor(c[4].0, c[4].1, c[4].2)), "│".truecolor(c[4].0, c[4].1, c[4].2));
+		println!("{}{}{}", "│   ".truecolor(c[4].0, c[4].1, c[4].2), format!("{:12} {:>21}   ", "Temperature:".white(), format!("{temp_display}{unit}")                .truecolor(c[4].0, c[4].1, c[4].2)), "│".truecolor(c[4].0, c[4].1, c[4].2));
 		// feels like
-		println!("{}{}{}", "│   ".truecolor(c[5].0, c[5].1, c[5].2), format!("{:12} {:>21}   ", "Feels like:".white(),  format!("{}{}",   feels_like_display, unit)          .truecolor(c[5].0, c[5].1, c[5].2)), "│".truecolor(c[5].0, c[5].1, c[5].2));
+		println!("{}{}{}", "│   ".truecolor(c[5].0, c[5].1, c[5].2), format!("{:12} {:>21}   ", "Feels like:".white(),  format!("{feels_like_display}{unit}")          .truecolor(c[5].0, c[5].1, c[5].2)), "│".truecolor(c[5].0, c[5].1, c[5].2));
 		// humidity
 		println!("{}{}{}", "│   ".truecolor(c[6].0, c[6].1, c[6].2), format!("{:12} {:>21}   ", "Humidity:".white(),    format!("{}%",    output.humidity)              .truecolor(c[6].0, c[6].1, c[6].2)), "│".truecolor(c[6].0, c[6].1, c[6].2));
 		// weather
