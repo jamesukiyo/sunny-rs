@@ -1,12 +1,22 @@
-use super::Output;
+use super::{HeaderFooter, Output, OutputStyle, PrintOpts};
 use colored::Colorize;
 
 const fn get_fahrenheit(temp: i64) -> i64 {
 	temp * 9 / 5 + 32
 }
 
+impl HeaderFooter {
+	fn show_header(&self) -> bool {
+		matches!(self, HeaderFooter::Header | HeaderFooter::Both)
+	}
+
+	fn show_footer(&self) -> bool {
+		matches!(self, HeaderFooter::Footer | HeaderFooter::Both)
+	}
+}
+
 #[rustfmt::skip]
-pub fn printer(raw: bool, simple: bool, fahrenheit: bool, output: &Output) {
+pub fn printer(opts: &PrintOpts, output: &Output) {
 	// colour palette
     let c = [
         (255, 255, 0),   // bright sunny yellow
@@ -32,46 +42,62 @@ pub fn printer(raw: bool, simple: bool, fahrenheit: bool, output: &Output) {
         _ => "?",
     };
 
-    let (temp_display, feels_like_display, unit) = if fahrenheit {
+    let (temp_display, feels_like_display, unit) = if opts.use_fahrenheit {
         (get_fahrenheit(output.temp), get_fahrenheit(output.feels_like), "°F")
     } else {
         (output.temp, output.feels_like, "°C")
     };
 
 	#[allow(clippy::format_in_format_args)]
-	if raw {
-		print!("{output:?}");
-	} else if simple {
-		println!("\nsunny-rs\n");
-		println!("{}, {} {}", output.city, output.country, weather_icon);
-		println!("Temperature: {temp_display}{unit}");
-		println!("Feels like: {feels_like_display}{unit}");
-		println!("Humidity: {}%", output.humidity);
-		println!("Weather: {}", output.type_of.to_lowercase());
-		println!("Description: {}", output.description);
-		println!("\nby github/jamesukiyo");
-	} else {
-		// sunny-rs
-		println!("{}", format!("┌{:─^47}┐", format!(" ⛅ {} ⛅ ", "sunny-rs".white())).truecolor(c[0].0, c[0].1, c[0].2));
-		// blank
-		println!("{}", format!("│{: ^40}│", "").truecolor(c[1].0, c[1].1, c[1].2));
-		// city, country, weather icon
-		println!("{}", format!("│{: ^40}│", format!("{}, {} {}", output.city, output.country, weather_icon).blue()).truecolor(c[2].0, c[2].1, c[2].2));
-		// blank
-		println!("{}", format!("│{: ^40}│", "").truecolor(c[3].0, c[3].1, c[3].2));
-		// temperature
-		println!("{}{}{}", "│   ".truecolor(c[4].0, c[4].1, c[4].2), format!("{:12} {:>21}   ", "Temperature:".white(), format!("{temp_display}{unit}")                .truecolor(c[4].0, c[4].1, c[4].2)), "│".truecolor(c[4].0, c[4].1, c[4].2));
-		// feels like
-		println!("{}{}{}", "│   ".truecolor(c[5].0, c[5].1, c[5].2), format!("{:12} {:>21}   ", "Feels like:".white(),  format!("{feels_like_display}{unit}")          .truecolor(c[5].0, c[5].1, c[5].2)), "│".truecolor(c[5].0, c[5].1, c[5].2));
-		// humidity
-		println!("{}{}{}", "│   ".truecolor(c[6].0, c[6].1, c[6].2), format!("{:12} {:>21}   ", "Humidity:".white(),    format!("{}%",    output.humidity)              .truecolor(c[6].0, c[6].1, c[6].2)), "│".truecolor(c[6].0, c[6].1, c[6].2));
-		// weather
-		println!("{}{}{}", "│   ".truecolor(c[7].0, c[7].1, c[7].2), format!("{:12} {:>21}   ", "Weather:".white(),     format!("{:.15}", output.type_of.to_lowercase()).truecolor(c[7].0, c[7].1, c[7].2)), "│".truecolor(c[7].0, c[7].1, c[7].2));
-		// description
-		println!("{}{}{}", "│   ".truecolor(c[8].0, c[8].1, c[8].2), format!("{:12} {:>21}   ", "Description:".white(), format!("{:.15}", output.description)           .truecolor(c[8].0, c[8].1, c[8].2)), "│".truecolor(c[8].0, c[8].1, c[8].2));
-		// blank
-		println!("{}", format!("│{: ^40}│", "").truecolor(c[9].0, c[9].1, c[9].2));
-		// by jamesukiyo
-		println!("{}", format!("└{:─^40}┘", " by github/jamesukiyo ").truecolor(c[10].0, c[10].1, c[10].2));
+	match opts.output_style {
+		OutputStyle::Raw => {
+			print!("{output:?}");
+		}
+		OutputStyle::Simple => {
+			if opts.header_footer.show_header() {
+				println!("\nsunny-rs\n");
+			}
+			println!("{}, {} {}", output.city, output.country, weather_icon);
+			println!("Temperature: {temp_display}{unit}");
+			println!("Feels like: {feels_like_display}{unit}");
+			println!("Humidity: {}%", output.humidity);
+			println!("Weather: {}", output.type_of.to_lowercase());
+			println!("Description: {}", output.description);
+			if opts.header_footer.show_footer() {
+				println!("\nby github/jamesukiyo");
+			}
+		}
+		OutputStyle::Pretty => {
+			// sunny-rs
+			if opts.header_footer.show_header() {
+				println!("{}", format!("┌{:─^47}┐", format!(" ⛅ {} ⛅ ", "sunny-rs".white())).truecolor(c[0].0, c[0].1, c[0].2));
+			} else {
+				println!("{}", format!("┌{:─^40}┐", "").truecolor(c[0].0, c[0].1, c[0].2));
+			}
+			// blank
+			println!("{}", format!("│{: ^40}│", "").truecolor(c[1].0, c[1].1, c[1].2));
+			// city, country, weather icon
+			println!("{}", format!("│{: ^40}│", format!("{}, {} {}", output.city, output.country, weather_icon).blue()).truecolor(c[2].0, c[2].1, c[2].2));
+			// blank
+			println!("{}", format!("│{: ^40}│", "").truecolor(c[3].0, c[3].1, c[3].2));
+			// temperature
+			println!("{}{}{}", "│   ".truecolor(c[4].0, c[4].1, c[4].2), format!("{:12} {:>21}   ", "Temperature:".white(), format!("{temp_display}{unit}")                .truecolor(c[4].0, c[4].1, c[4].2)), "│".truecolor(c[4].0, c[4].1, c[4].2));
+			// feels like
+			println!("{}{}{}", "│   ".truecolor(c[5].0, c[5].1, c[5].2), format!("{:12} {:>21}   ", "Feels like:".white(),  format!("{feels_like_display}{unit}")          .truecolor(c[5].0, c[5].1, c[5].2)), "│".truecolor(c[5].0, c[5].1, c[5].2));
+			// humidity
+			println!("{}{}{}", "│   ".truecolor(c[6].0, c[6].1, c[6].2), format!("{:12} {:>21}   ", "Humidity:".white(),    format!("{}%",    output.humidity)              .truecolor(c[6].0, c[6].1, c[6].2)), "│".truecolor(c[6].0, c[6].1, c[6].2));
+			// weather
+			println!("{}{}{}", "│   ".truecolor(c[7].0, c[7].1, c[7].2), format!("{:12} {:>21}   ", "Weather:".white(),     format!("{:.15}", output.type_of.to_lowercase()).truecolor(c[7].0, c[7].1, c[7].2)), "│".truecolor(c[7].0, c[7].1, c[7].2));
+			// description
+			println!("{}{}{}", "│   ".truecolor(c[8].0, c[8].1, c[8].2), format!("{:12} {:>21}   ", "Description:".white(), format!("{:.15}", output.description)           .truecolor(c[8].0, c[8].1, c[8].2)), "│".truecolor(c[8].0, c[8].1, c[8].2));
+			// blank
+			println!("{}", format!("│{: ^40}│", "").truecolor(c[9].0, c[9].1, c[9].2));
+			// by jamesukiyo
+			if opts.header_footer.show_footer() {
+				println!("{}", format!("└{:─^40}┘", " by github/jamesukiyo ").truecolor(c[10].0, c[10].1, c[10].2));
+			} else {
+				println!("{}", format!("└{:─^40}┘", "").truecolor(c[10].0, c[10].1, c[10].2));
+			}
+		}
 	}
 }

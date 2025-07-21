@@ -28,6 +28,25 @@ struct Output {
 	icon: String,
 }
 
+enum HeaderFooter {
+	Clean,
+	Header,
+	Footer,
+	Both,
+}
+
+enum OutputStyle {
+	Pretty,
+	Simple,
+	Raw,
+}
+
+struct PrintOpts {
+	use_fahrenheit: bool,
+	header_footer: HeaderFooter,
+	output_style: OutputStyle,
+}
+
 fn main() -> Result<()> {
 	color_eyre::install()?;
 	let args = Args::parse();
@@ -50,12 +69,43 @@ fn main() -> Result<()> {
 		config.city.trim()
 	} else {
 		return Err(eyre!(
-			"No city specified, use -c or set 'city' in ~/.config/sunny.toml"
+			"No city specified, use 'sunny <city>' or set 'city' in ~/.config/sunny.toml"
 		));
 	};
 
 	// fahrenheit: args > config
 	let use_fahrenheit = args.fahrenheit || config.use_fahrenheit;
+
+	// header/footer display
+	let header_footer =
+		if args.clean_output || (args.no_header && args.no_footer) {
+			HeaderFooter::Clean
+		} else {
+			let show_header = !args.no_header && config.show_header;
+			let show_footer = !args.no_footer && config.show_footer;
+
+			match (show_header, show_footer) {
+				(true, true) => HeaderFooter::Both,
+				(true, false) => HeaderFooter::Header,
+				(false, true) => HeaderFooter::Footer,
+				(false, false) => HeaderFooter::Clean,
+			}
+		};
+
+	// output style
+	let output_style = if args.raw {
+		OutputStyle::Raw
+	} else if args.simple {
+		OutputStyle::Simple
+	} else {
+		OutputStyle::Pretty
+	};
+
+	let print_opts = PrintOpts {
+		use_fahrenheit,
+		header_footer,
+		output_style,
+	};
 
 	let data = fetch_weather(city, api_key)?;
 
@@ -76,7 +126,7 @@ fn main() -> Result<()> {
 		icon: weather.icon,
 	};
 
-	printer(args.raw, args.simple, use_fahrenheit, &output);
+	printer(&print_opts, &output);
 	Ok(())
 }
 

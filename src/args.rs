@@ -1,6 +1,6 @@
 use clap::Parser;
 
-#[allow(clippy::doc_markdown)]
+#[allow(clippy::doc_markdown, clippy::struct_excessive_bools)]
 #[derive(Parser)]
 #[command(name = "sunny-rs")]
 #[command(about = "A project by github/jamesukiyo\n\nView the weather from your terminal.", long_about = None)]
@@ -14,7 +14,7 @@ pub struct Args {
 	pub simple: bool,
 
 	/// Raw JSON output
-	#[arg(long = "raw")]
+	#[arg(short = 'r', long = "raw")]
 	pub raw: bool,
 
 	/// API key for OpenWeatherMap (overrides config)
@@ -24,4 +24,16 @@ pub struct Args {
 	/// Use fahrenheit for temperature
 	#[arg(short = 'f', long = "fahrenheit")]
 	pub fahrenheit: bool,
+
+	/// Hide the credits footer from output
+	#[arg(short = 'F', long = "no-footer")]
+	pub no_footer: bool,
+
+	/// Hide the header from output
+	#[arg(short = 'H', long = "no-header")]
+	pub no_header: bool,
+
+	/// Alias for --no-header --no-footer
+	#[arg(short = 'c', long = "clean")]
+	pub clean_output: bool,
 }

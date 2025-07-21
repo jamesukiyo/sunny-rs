@@ -1,6 +1,6 @@
 <h1 align="center">⛅ sunny-rs ⛅</h1>
 
-<p align="center">A simple CLI weather app written in Rust.</p>
+<p align="center">A simple weather app for your terminal written in Rust.</p>
 
 <div align="center">
     <img src="/showcase/showcase.png" width="400px">
@@ -8,7 +8,7 @@
 
 ## Features
 - check the current weather for any city
-- fast (120ms with fetch, sunny itself only takes 0.5 to 3ms depending on output style)
+- fast (~130ms with fetch, sunny itself only takes 0.5 to 3ms depending on output style)
 - 3 output styles: fancy, simple, raw
 - fahrenheit support
 - toml config file
@@ -20,7 +20,7 @@
 cargo install sunny-cli
 ```
 
-You will need an API key from [OpenWeatherMap](https://openweathermap.org/api).
+You will need a free API key from [OpenWeatherMap](https://openweathermap.org/api).
 
 ### Config
 
@@ -30,6 +30,8 @@ Inside it you can set the following:
 - `city`: the city to get the weather for
 - `api_key`: your API key for OpenWeatherMap
 - `use_fahrenheit`: whether to use fahrenheit for temperature
+- `show_footer`: whether to show the footer
+- `show_header`: whether to show the header
 
 See `example_config.toml` for an example.
 
@@ -48,16 +50,19 @@ sunny paris  # allows override
 
 ### Run
 ```
-Usage: sunny [OPTIONS] [CITY]
+``Usage: sunny [OPTIONS] [CITY]
 
 Arguments:
   [CITY]  City to get the weather for (overrides config) [default: ]
 
 Options:
   -s, --simple      Simpler output (no colours)
-      --raw         Raw JSON output
+  -r, --raw         Raw JSON output
   -k, --key <KEY>   API key for OpenWeatherMap (overrides config) [default: ]
   -f, --fahrenheit  Use fahrenheit for temperature
+  -F, --no-footer   Hide the credits footer from output
+  -H, --no-header   Hide the header from output
+  -c, --clean       Alias for --no-header --no-footer
   -h, --help        Print help
 ```
 

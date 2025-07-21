@@ -4,11 +4,25 @@ use std::path::PathBuf;
 use color_eyre::eyre::{Result, eyre};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
 	pub city: String,
 	pub api_key: String,
 	pub use_fahrenheit: bool,
+	pub show_footer: bool,
+	pub show_header: bool,
+}
+
+impl Default for Config {
+	fn default() -> Self {
+		Self {
+			city: String::new(),
+			api_key: String::new(),
+			use_fahrenheit: false,
+			show_footer: true,
+			show_header: true,
+		}
+	}
 }
 
 impl Config {
