@@ -1,10 +1,8 @@
-use std::ops::{Add, Div, Mul};
-
 use super::Output;
 use colored::Colorize;
 
-fn get_fahrenheit(temp: i64) -> i64 {
-	temp.mul(9).div(5).add(32)
+const fn get_fahrenheit(temp: i64) -> i64 {
+	temp * 9 / 5 + 32
 }
 
 #[rustfmt::skip]
