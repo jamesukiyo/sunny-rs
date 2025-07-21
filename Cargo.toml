@@ -1,9 +1,14 @@
 [package]
-name = "sunny"
+name = "sunny-cli"
 version = "0.1.0"
 authors = ["James Plummer <jamesp2001@live.co.uk>"]
 categories = ["command-line-utilities"]
 edition = "2024"
+homepage = "https://github.com/jamesukiyo/sunny-rs"
+keywords = ["cli", "weather", "terminal"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/jamesukiyo/sunny-rs"
 description = "Check the weather from your terminal."
 
 [[bin]]
