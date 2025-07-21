@@ -1,6 +1,6 @@
 <h1 align="center">⛅ sunny-rs ⛅</h1>
 
-<p align="center">A simple weather app for your terminal written in Rust.</p>
+<p align="center">A simple weather app for your terminal, written in Rust.</p>
 
 <div align="center">
     <img src="/showcase/showcase.png" width="400px">
@@ -50,7 +50,7 @@ sunny paris  # allows override
 
 ### Run
 ```
-``Usage: sunny [OPTIONS] [CITY]
+Usage: sunny [OPTIONS] [CITY]
 
 Arguments:
   [CITY]  City to get the weather for (overrides config) [default: ]
