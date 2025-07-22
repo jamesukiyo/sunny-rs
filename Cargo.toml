@@ -1,6 +1,6 @@
 [package]
 name = "sunny-cli"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["James Plummer <jamesp2001@live.co.uk>"]
 categories = ["command-line-utilities"]
 edition = "2024"
