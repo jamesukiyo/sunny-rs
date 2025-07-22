@@ -22,6 +22,7 @@ unwrap_used = "deny"
 clap = { version = "4.5", features = ["derive"] }
 color-eyre = { version = "0.6", default-features = false }
 colored = "3.0"
+console = "0.16"
 reqwest = { version = "0.12", features = ["json", "blocking"] }
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.9"

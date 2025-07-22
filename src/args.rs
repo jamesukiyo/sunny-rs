@@ -3,13 +3,13 @@ use clap::Parser;
 #[allow(clippy::doc_markdown, clippy::struct_excessive_bools)]
 #[derive(Parser)]
 #[command(name = "sunny-rs")]
-#[command(about = "A project by github/jamesukiyo\n\nView the weather from your terminal.", long_about = None)]
+#[command(about = "A project by github/jamesukiyo\n\nView the current weather from your terminal.", long_about = None)]
 pub struct Args {
-	/// City to get the weather for (overrides config)
+	/// City to get the weather for
 	#[arg(index = 1, default_value = "")]
 	pub city: String,
 
-	/// Simpler output (no colours)
+	/// Simpler output (no styling)
 	#[arg(short = 's', long = "simple")]
 	pub simple: bool,
 
@@ -17,7 +17,7 @@ pub struct Args {
 	#[arg(short = 'r', long = "raw")]
 	pub raw: bool,
 
-	/// API key for OpenWeatherMap (overrides config)
+	/// API key for OpenWeatherMap
 	#[arg(short = 'k', long = "key", default_value = "")]
 	pub key: String,
 
@@ -37,7 +37,7 @@ pub struct Args {
 	#[arg(short = 'c', long = "clean")]
 	pub clean_output: bool,
 
-	/// Enable unicode icons (requires nerd font and terminal support)
-	#[arg(short = 'i', long = "icons")]
-	pub icons: bool,
+	/// Disable icons - good for non-nerd fonts or lack of emoji support
+	#[arg(short = 'i', long = "no-icons")]
+	pub no_icons: bool,
 }

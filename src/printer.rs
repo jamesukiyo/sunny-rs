@@ -1,7 +1,8 @@
 use super::{HeaderFooter, Output, OutputStyle, PrintOpts};
 use colored::Colorize;
+use console::{Alignment, Emoji, pad_str, pad_str_with};
 
-const fn get_fahrenheit(temp: i64) -> i64 {
+const fn calc_f(temp: i64) -> i64 {
 	temp * 9 / 5 + 32
 }
 
@@ -15,52 +16,64 @@ impl HeaderFooter {
 	}
 }
 
-#[rustfmt::skip]
-pub fn printer(opts: &PrintOpts, output: &Output) {
-	// colour palette
-    let c = [
-        (255, 255, 0),   // bright sunny yellow
-        (255, 240, 50),  // light yellow
-        (255, 220, 100), // golden yellow
-        (255, 200, 120), // light orange
-        (255, 180, 140), // peach
-        (255, 160, 160), // coral pink
-        (255, 140, 180), // pink
-        (240, 120, 200), // rose pink
-        (220, 100, 220), // light purple
-        (200, 100, 240), // lavender purple
-        (180, 120, 250), // light summer purple
-    ];
+static COLOURS: [(u8, u8, u8); 11] = [
+	(255, 255, 0),   // bright sunny yellow
+	(255, 240, 50),  // light yellow
+	(255, 220, 100), // golden yellow
+	(255, 200, 120), // light orange
+	(255, 180, 140), // peach
+	(255, 160, 160), // coral pink
+	(255, 140, 180), // pink
+	(240, 120, 200), // rose pink
+	(220, 100, 220), // light purple
+	(200, 100, 240), // lavender purple
+	(180, 120, 250), // light summer purple
+];
 
-	 let weather_icon = if opts.use_icons {
+fn create_box_line(
+	content: &str,
+	width: usize,
+	colour: (u8, u8, u8),
+) -> impl std::fmt::Display {
+	format!("│{}│", pad_str(content, width, Alignment::Center, None))
+		.truecolor(colour.0, colour.1, colour.2)
+}
+
+fn data_row(label: &str, value: &str, colour: (u8, u8, u8)) -> String {
+	let l = "│   ".truecolor(colour.0, colour.1, colour.2);
+	let m = format!(
+		"{:12} {:>21}   ",
+		label.white(),
+		value.truecolor(colour.0, colour.1, colour.2)
+	);
+	let r = "│".truecolor(colour.0, colour.1, colour.2);
+	format!("{l}{m}{r}")
+}
+
+#[allow(clippy::too_many_lines)]
+pub fn printer(opts: &PrintOpts, output: &Output) {
+	let (weather_icon, fallback_icon) = if opts.use_icons {
 		match output.icon.as_str() {
-			"01d" => "☀", // clear sky day
-			"01n" => "☽", // clear sky night
-			"02d" | "02n" | "03d" | "03n" | "04d" | "04n" | "50d" | "50n" => "☁", // cloudy/fog/mist
-			"09d" | "09n" | "10d" | "10n" => "☔", // rain
-			"11d" | "11n" => "⚡", // storm
-			"13d" | "13n" => "❄", // snow
-			_ => "?",
+			"01d" => ("☀️", ""), // clear sky day
+			"01n" => ("☽", ""),  // clear sky night
+			"02d" | "02n" | "03d" | "03n" | "04d" | "04n" | "50d" | "50n" => {
+				("☁", "")
+			} // cloudy/fog/mist
+			"09d" | "09n" | "10d" | "10n" => ("☔", ""), // rain
+			"11d" | "11n" => ("⚡", ""), // storm
+			"13d" | "13n" => ("❄", ""), // snow
+			_ => ("?", "?"),
 		}
 	} else {
-		match output.icon.as_str() {
-			"01d" => "*", // clear sky day
-			"01n" => ".", // clear sky night
-			"02d" | "02n" | "03d" | "03n" | "04d" | "04n" | "50d" | "50n" => "~", // cloudy/fog/mist
-			"09d" | "09n" | "10d" | "10n" => "|", // rain
-			"11d" | "11n" => "!", // storm
-			"13d" | "13n" => "*", // snow
-			_ => "?",
-		}
+		("?", "?")
 	};
 
-    let (temp_display, feels_like_display, unit) = if opts.use_fahrenheit {
-        (get_fahrenheit(output.temp), get_fahrenheit(output.feels_like), "°F")
-    } else {
-        (output.temp, output.feels_like, "°C")
-    };
+	let (temp_display, feels_like_display, unit) = if opts.use_fahrenheit {
+		(calc_f(output.temp), calc_f(output.feels_like), "°F")
+	} else {
+		(output.temp, output.feels_like, "°C")
+	};
 
-	#[allow(clippy::format_in_format_args)]
 	match opts.output_style {
 		OutputStyle::Raw => {
 			print!("{output:?}");
@@ -69,7 +82,16 @@ pub fn printer(opts: &PrintOpts, output: &Output) {
 			if opts.header_footer.show_header() {
 				println!("\nsunny-rs\n");
 			}
-			println!("{}, {} {}", output.city, output.country, weather_icon);
+			if opts.use_icons {
+				println!(
+					"{}, {} {}",
+					output.city,
+					output.country,
+					Emoji(weather_icon, fallback_icon)
+				);
+			} else {
+				println!("{}, {}", output.city, output.country);
+			}
 			println!("Temperature: {temp_display}{unit}");
 			println!("Feels like: {feels_like_display}{unit}");
 			println!("Humidity: {}%", output.humidity);
@@ -80,40 +102,124 @@ pub fn printer(opts: &PrintOpts, output: &Output) {
 			}
 		}
 		OutputStyle::Pretty => {
-			// sunny-rs
 			if opts.header_footer.show_header() {
-                if opts.use_icons {
-                    println!("{}", format!("┌{:─^47}┐", format!(" ⛅ {} ⛅ ", "sunny-rs".white())).truecolor(c[0].0, c[0].1, c[0].2));
-                } else {
-                    println!("{}", format!("┌{:─^49}┐", format!(" {} ", "sunny-rs".white())).truecolor(c[0].0, c[0].1, c[0].2));
-                }
+				let header_content = if opts.use_icons {
+					format!(
+						" {} {} {} ",
+						Emoji("⛅", ""),
+						"sunny-rs".white(),
+						Emoji("⛅", "")
+					)
+				} else {
+					format!(" {} ", "sunny-rs".white())
+				};
+				println!(
+					"{}",
+					format!(
+						"┌{}┐",
+						pad_str_with(
+							&header_content,
+							40,
+							Alignment::Center,
+							None,
+							'─'
+						)
+					)
+					.truecolor(COLOURS[0].0, COLOURS[0].1, COLOURS[0].2)
+				);
 			} else {
-				println!("{}", format!("┌{:─^40}┐", "").truecolor(c[0].0, c[0].1, c[0].2));
+				println!(
+					"{}",
+					format!(
+						"┌{}┐",
+						pad_str_with("", 40, Alignment::Center, None, '─')
+					)
+					.truecolor(COLOURS[0].0, COLOURS[0].1, COLOURS[0].2)
+				);
 			}
-			// blank
-			println!("{}", format!("│{: ^40}│", "").truecolor(c[1].0, c[1].1, c[1].2));
-			// city, country, weather icon
-			println!("{}", format!("│{: ^40}│", format!("{}, {} {}", output.city, output.country, weather_icon).blue()).truecolor(c[2].0, c[2].1, c[2].2));
-			// blank
-			println!("{}", format!("│{: ^40}│", "").truecolor(c[3].0, c[3].1, c[3].2));
-			// temperature
-			println!("{}{}{}", "│   ".truecolor(c[4].0, c[4].1, c[4].2), format!("{:12} {:>21}   ", "Temperature:".white(), format!("{temp_display}{unit}")                .truecolor(c[4].0, c[4].1, c[4].2)), "│".truecolor(c[4].0, c[4].1, c[4].2));
-			// feels like
-			println!("{}{}{}", "│   ".truecolor(c[5].0, c[5].1, c[5].2), format!("{:12} {:>21}   ", "Feels like:".white(),  format!("{feels_like_display}{unit}")          .truecolor(c[5].0, c[5].1, c[5].2)), "│".truecolor(c[5].0, c[5].1, c[5].2));
-			// humidity
-			println!("{}{}{}", "│   ".truecolor(c[6].0, c[6].1, c[6].2), format!("{:12} {:>21}   ", "Humidity:".white(),    format!("{}%",    output.humidity)              .truecolor(c[6].0, c[6].1, c[6].2)), "│".truecolor(c[6].0, c[6].1, c[6].2));
-			// weather
-			println!("{}{}{}", "│   ".truecolor(c[7].0, c[7].1, c[7].2), format!("{:12} {:>21}   ", "Weather:".white(),     format!("{:.15}", output.type_of.to_lowercase()).truecolor(c[7].0, c[7].1, c[7].2)), "│".truecolor(c[7].0, c[7].1, c[7].2));
-			// description
-			println!("{}{}{}", "│   ".truecolor(c[8].0, c[8].1, c[8].2), format!("{:12} {:>21}   ", "Description:".white(), format!("{:.15}", output.description)           .truecolor(c[8].0, c[8].1, c[8].2)), "│".truecolor(c[8].0, c[8].1, c[8].2));
-			// blank
-			println!("{}", format!("│{: ^40}│", "").truecolor(c[9].0, c[9].1, c[9].2));
-			// by jamesukiyo
-			if opts.header_footer.show_footer() {
-				println!("{}", format!("└{:─^40}┘", " by github/jamesukiyo ").truecolor(c[10].0, c[10].1, c[10].2));
+
+			println!("{}", create_box_line("", 40, COLOURS[1]));
+
+			let city_info = if opts.use_icons {
+				format!(
+					"{}",
+					format!(
+						"{}, {} {}",
+						output.city,
+						output.country,
+						Emoji(weather_icon, fallback_icon)
+					)
+					.blue()
+				)
 			} else {
-				println!("{}", format!("└{:─^40}┘", "").truecolor(c[10].0, c[10].1, c[10].2));
-			}
+				format!(
+					"{}",
+					format!("{}, {}", output.city, output.country).blue()
+				)
+			};
+			println!("{}", create_box_line(&city_info, 40, COLOURS[2]));
+			println!("{}", create_box_line("", 40, COLOURS[3]));
+			println!(
+				"{}",
+				data_row(
+					"Temperature:",
+					&format!("{temp_display}{unit}"),
+					COLOURS[4]
+				)
+			);
+			println!(
+				"{}",
+				data_row(
+					"Feels like:",
+					&format!("{feels_like_display}{unit}"),
+					COLOURS[5]
+				)
+			);
+			println!(
+				"{}",
+				data_row(
+					"Humidity:",
+					&format!("{}%", output.humidity),
+					COLOURS[6]
+				)
+			);
+			println!(
+				"{}",
+				data_row(
+					"Weather:",
+					&format!("{:.15}", output.type_of.to_lowercase()),
+					COLOURS[7]
+				)
+			);
+			println!(
+				"{}",
+				data_row(
+					"Description:",
+					&format!("{:.15}", output.description),
+					COLOURS[8]
+				)
+			);
+			println!("{}", create_box_line("", 40, COLOURS[9]));
+
+			let footer_content = if opts.header_footer.show_footer() {
+				" by github/jamesukiyo "
+			} else {
+				""
+			};
+			println!(
+				"{}",
+				format!(
+					"└{}┘",
+					pad_str_with(
+						footer_content,
+						40,
+						Alignment::Center,
+						None,
+						'─'
+					)
+				)
+				.truecolor(COLOURS[10].0, COLOURS[10].1, COLOURS[10].2)
+			);
 		}
 	}
 }

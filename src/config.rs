@@ -23,7 +23,7 @@ impl Default for Config {
 			use_fahrenheit: false,
 			show_footer: true,
 			show_header: true,
-			icons: false,
+			icons: true,
 		}
 	}
 }

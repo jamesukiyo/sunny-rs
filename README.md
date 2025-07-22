@@ -11,6 +11,7 @@
 - fast (~130ms with fetch, sunny itself only takes 0.5 to 3ms depending on output style)
 - 3 output styles: fancy, simple, raw
 - fahrenheit support
+- emojis or nerd font icons if supported
 - toml config file
 
 ## Usage
@@ -22,6 +23,8 @@ cargo install sunny-cli
 
 You will need a free API key from [OpenWeatherMap](https://openweathermap.org/api).
 
+A nerd font and terminal that supports emojis is recommended (see below).
+
 ### Config
 
 A config file is created on first run at `$HOME/.config/sunny.toml`.
@@ -32,12 +35,17 @@ Inside it you can set the following:
 - `use_fahrenheit`: whether to use fahrenheit for temperature [default: false]
 - `show_footer`: whether to show the footer [default: true]
 - `show_header`: whether to show the header [default: true]
-- `icons`: whether to use unicode icons [default: false]
+- `icons`: whether to enable nerd font and emoji icons [default: true]
+
+>[!INFO]
+> If icons are enabled, an emoji is tried first if supported and then a nerd
+> font icon. If neither work, the layout may be incorrect so try disabling icons
+> or trying a nerd font.
 
 See `example_config.toml` for an example.
 
->[!NOTE]
-> CLI arguments will override config values.
+>[!HINT]
+> CLI arguments will override corresponding config values.
 
 I recommend using the config file. Then you can run `sunny` without any
 arguments and see the weather quickly.
@@ -57,21 +65,16 @@ Arguments:
   [CITY]  City to get the weather for (overrides config) [default: ]
 
 Options:
-  -s, --simple      Simpler output (no colours)
+  -s, --simple      Simpler output (no styling)
   -r, --raw         Raw JSON output
-  -k, --key <KEY>   API key for OpenWeatherMap (overrides config) [default: ]
+  -k, --key <KEY>   API key for OpenWeatherMap [default: ]
   -f, --fahrenheit  Use fahrenheit for temperature
   -F, --no-footer   Hide the credits footer from output
   -H, --no-header   Hide the header from output
   -c, --clean       Alias for --no-header --no-footer
-  -i, --icons       Enable unicode icons (requires nerd font and terminal support)
+  -i, --no-icons    Disable icons - good for non-nerd fonts or lack of emoji support
   -h, --help        Print help
 ```
-
->[!NOTE]
-> Unicode icons are now disabled by default. They are inconsistent so I need to
-> find some that are the same width or calculate the width to display them
-> better.
 
 ## License
 

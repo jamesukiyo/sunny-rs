@@ -102,7 +102,7 @@ fn main() -> Result<()> {
 		OutputStyle::Pretty
 	};
 
-	let use_icons = args.icons || config.icons;
+	let use_icons = !args.no_icons || config.icons;
 
 	let print_opts = PrintOpts {
 		use_fahrenheit,
