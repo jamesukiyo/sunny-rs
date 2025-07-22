@@ -4,6 +4,7 @@ use std::path::PathBuf;
 use color_eyre::eyre::{Result, eyre};
 use serde::{Deserialize, Serialize};
 
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
 	pub city: String,
@@ -11,6 +12,7 @@ pub struct Config {
 	pub use_fahrenheit: bool,
 	pub show_footer: bool,
 	pub show_header: bool,
+	pub icons: bool,
 }
 
 impl Default for Config {
@@ -21,6 +23,7 @@ impl Default for Config {
 			use_fahrenheit: false,
 			show_footer: true,
 			show_header: true,
+			icons: false,
 		}
 	}
 }

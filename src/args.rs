@@ -36,4 +36,8 @@ pub struct Args {
 	/// Alias for --no-header --no-footer
 	#[arg(short = 'c', long = "clean")]
 	pub clean_output: bool,
+
+	/// Enable unicode icons (requires nerd font and terminal support)
+	#[arg(short = 'i', long = "icons")]
+	pub icons: bool,
 }

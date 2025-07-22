@@ -27,11 +27,12 @@ You will need a free API key from [OpenWeatherMap](https://openweathermap.org/ap
 A config file is created on first run at `$HOME/.config/sunny.toml`.
 
 Inside it you can set the following:
-- `city`: the city to get the weather for
-- `api_key`: your API key for OpenWeatherMap
-- `use_fahrenheit`: whether to use fahrenheit for temperature
-- `show_footer`: whether to show the footer
-- `show_header`: whether to show the header
+- `city`: the city to get the weather for [default: ""]
+- `api_key`: your API key for OpenWeatherMap [default: ""]
+- `use_fahrenheit`: whether to use fahrenheit for temperature [default: false]
+- `show_footer`: whether to show the footer [default: true]
+- `show_header`: whether to show the header [default: true]
+- `icons`: whether to use unicode icons [default: false]
 
 See `example_config.toml` for an example.
 
@@ -63,8 +64,14 @@ Options:
   -F, --no-footer   Hide the credits footer from output
   -H, --no-header   Hide the header from output
   -c, --clean       Alias for --no-header --no-footer
+  -i, --icons       Enable unicode icons (requires nerd font and terminal support)
   -h, --help        Print help
 ```
+
+>[!NOTE]
+> Unicode icons are now disabled by default. They are inconsistent so I need to
+> find some that are the same width or calculate the width to display them
+> better.
 
 ## License
 

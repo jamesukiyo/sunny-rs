@@ -32,15 +32,27 @@ pub fn printer(opts: &PrintOpts, output: &Output) {
         (180, 120, 250), // light summer purple
     ];
 
-    let weather_icon = match output.icon.as_str() {
-        "01d" => "☀", // clear sky day
-        "01n" => "☽", // clear sky night
-        "02d" | "02n" | "03d" | "03n" | "04d" | "04n" | "50d" | "50n" => "☁", // cloudy/fog/mist
-        "09d" | "09n" | "10d" | "10n" => "☔", // rain
-        "11d" | "11n" => "⚡", // storm
-        "13d" | "13n" => "❄", // snow
-        _ => "?",
-    };
+	 let weather_icon = if opts.use_icons {
+		match output.icon.as_str() {
+			"01d" => "☀", // clear sky day
+			"01n" => "☽", // clear sky night
+			"02d" | "02n" | "03d" | "03n" | "04d" | "04n" | "50d" | "50n" => "☁", // cloudy/fog/mist
+			"09d" | "09n" | "10d" | "10n" => "☔", // rain
+			"11d" | "11n" => "⚡", // storm
+			"13d" | "13n" => "❄", // snow
+			_ => "?",
+		}
+	} else {
+		match output.icon.as_str() {
+			"01d" => "*", // clear sky day
+			"01n" => ".", // clear sky night
+			"02d" | "02n" | "03d" | "03n" | "04d" | "04n" | "50d" | "50n" => "~", // cloudy/fog/mist
+			"09d" | "09n" | "10d" | "10n" => "|", // rain
+			"11d" | "11n" => "!", // storm
+			"13d" | "13n" => "*", // snow
+			_ => "?",
+		}
+	};
 
     let (temp_display, feels_like_display, unit) = if opts.use_fahrenheit {
         (get_fahrenheit(output.temp), get_fahrenheit(output.feels_like), "°F")
@@ -70,7 +82,11 @@ pub fn printer(opts: &PrintOpts, output: &Output) {
 		OutputStyle::Pretty => {
 			// sunny-rs
 			if opts.header_footer.show_header() {
-				println!("{}", format!("┌{:─^47}┐", format!(" ⛅ {} ⛅ ", "sunny-rs".white())).truecolor(c[0].0, c[0].1, c[0].2));
+                if opts.use_icons {
+                    println!("{}", format!("┌{:─^47}┐", format!(" ⛅ {} ⛅ ", "sunny-rs".white())).truecolor(c[0].0, c[0].1, c[0].2));
+                } else {
+                    println!("{}", format!("┌{:─^49}┐", format!(" {} ", "sunny-rs".white())).truecolor(c[0].0, c[0].1, c[0].2));
+                }
 			} else {
 				println!("{}", format!("┌{:─^40}┐", "").truecolor(c[0].0, c[0].1, c[0].2));
 			}

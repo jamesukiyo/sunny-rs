@@ -45,6 +45,7 @@ struct PrintOpts {
 	use_fahrenheit: bool,
 	header_footer: HeaderFooter,
 	output_style: OutputStyle,
+	use_icons: bool,
 }
 
 fn main() -> Result<()> {
@@ -101,10 +102,13 @@ fn main() -> Result<()> {
 		OutputStyle::Pretty
 	};
 
+	let use_icons = args.icons || config.icons;
+
 	let print_opts = PrintOpts {
 		use_fahrenheit,
 		header_footer,
 		output_style,
+		use_icons,
 	};
 
 	let data = fetch_weather(city, api_key)?;

@@ -1,3 +1,6 @@
 /target
 
 mprocs.log
+mprocs.yaml
+
+.env
