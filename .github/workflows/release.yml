@@ -59,13 +59,13 @@ jobs:
                       }
                     - {
                           NAME: windows-x64,
-                          OS: windows-2022,
+                          OS: windows-latest,
                           TOOLCHAIN: stable,
                           TARGET: x86_64-pc-windows-msvc,
                       }
                     - {
                           NAME: windows-arm64,
-                          OS: windows-2022,
+                          OS: windows-latest,
                           TOOLCHAIN: stable,
                           TARGET: aarch64-pc-windows-msvc,
                       }
@@ -90,7 +90,7 @@ jobs:
                   cache-base: "^master$"
                   targets: ${{ matrix.build.TARGET }}
 
-            - name: Install cross-compilation dependencies
+            - name: Setup ARM64 cross-compilation
               if: matrix.build.TARGET == 'aarch64-unknown-linux-gnu'
               run: |
                   sudo apt-get update
@@ -98,16 +98,22 @@ jobs:
 
             - name: Build binary
               run: cargo build --release --locked --target ${{ matrix.build.TARGET }}
+              env:
+                  PKG_CONFIG_ALLOW_CROSS: ${{ matrix.build.TARGET == 'aarch64-unknown-linux-gnu' && '1' || '' }}
+                  PKG_CONFIG_PATH: ${{ matrix.build.TARGET == 'aarch64-unknown-linux-gnu' && '/usr/lib/aarch64-linux-gnu/pkgconfig' || '' }}
+                  CC_aarch64_unknown_linux_gnu: ${{ matrix.build.TARGET == 'aarch64-unknown-linux-gnu' && 'aarch64-linux-gnu-gcc' || '' }}
+                  AR_aarch64_unknown_linux_gnu: ${{ matrix.build.TARGET == 'aarch64-unknown-linux-gnu' && 'aarch64-linux-gnu-ar' || '' }}
+                  CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: ${{ matrix.build.TARGET == 'aarch64-unknown-linux-gnu' && 'aarch64-linux-gnu-gcc' || '' }}
 
             - name: Prepare binary (Unix)
-              if: matrix.build.OS != 'windows-2022'
+              if: matrix.build.OS != 'windows-latest'
               run: |
                   mkdir -p dist
                   cp target/${{ matrix.build.TARGET }}/release/sunny dist/
                   chmod +x dist/sunny
 
             - name: Prepare binary (Windows)
-              if: matrix.build.OS == 'windows-2022'
+              if: matrix.build.OS == 'windows-latest'
               run: |
                   mkdir dist
                   cp target/${{ matrix.build.TARGET }}/release/sunny.exe dist/
