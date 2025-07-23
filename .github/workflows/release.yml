@@ -8,7 +8,7 @@ on:
 env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}
-    NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     CARGO_TERM_COLOR: always
 
 jobs:
@@ -125,18 +125,19 @@ jobs:
                   path: dist/
                   retention-days: 1
 
-    publish-cargo:
-        name: Publish to Cargo
-        needs: [build-cross-platform, lint]
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-            - uses: moonrepo/setup-rust@v1
-              with:
-                  channel: stable
-                  cache-base: "^master$"
-            - name: Publish to crates.io
-              run: cargo publish --token ${{ env.CARGO_TOKEN }}
+    # TEMPORARY FOR EXISTING 0.3.0
+    # publish-cargo:
+    #     name: Publish to Cargo
+    #     needs: [build-cross-platform, lint]
+    #     runs-on: ubuntu-latest
+    #     steps:
+    #         - uses: actions/checkout@v4
+    #         - uses: moonrepo/setup-rust@v1
+    #           with:
+    #               channel: stable
+    #               cache-base: "^master$"
+    #         - name: Publish to crates.io
+    #           run: cargo publish --token ${{ env.CARGO_TOKEN }}
 
     publish-npm:
         name: Publish NPM packages
@@ -149,6 +150,7 @@ jobs:
               with:
                   node-version: "20"
                   registry-url: "https://registry.npmjs.org"
+                  scope: "@jamesukiyo"
 
             - name: Download all artifacts
               uses: actions/download-artifact@v4
@@ -176,19 +178,19 @@ jobs:
                     cd ../..
                   done
               env:
-                  NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
             - name: Publish main package
               run: |
                   echo "Publishing @jamesukiyo/sunny-cli"
                   cd packages/base
                   npm publish --access public
-              env:
-                  NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
 
     github-release:
         name: Create GitHub Release
-        needs: [build-cross-platform, publish-cargo, publish-npm, lint]
+        # TEMPORARY FOR EXISTING 0.3.0
+        # needs: [build-cross-platform, publish-cargo, publish-npm, lint]
+        needs: [build-cross-platform, publish-npm, lint]
         permissions:
             contents: write
         runs-on: ubuntu-latest
