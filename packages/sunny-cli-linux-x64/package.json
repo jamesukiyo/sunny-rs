@@ -1,6 +1,6 @@
 {
 	"name": "@jamesukiyo/sunny-cli-linux-x64",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"author": "James Plummer <jamesp2001@live.co.uk>",
 	"description": "Linux x64 binary for sunny-cli.",
 	"keywords": [

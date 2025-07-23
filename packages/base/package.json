@@ -1,6 +1,6 @@
 {
 	"name": "@jamesukiyo/sunny-cli",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"author": "James Plummer <jamesp2001@live.co.uk>",
 	"description": "Check the weather from your terminal.",
 	"keywords": [
@@ -27,12 +27,12 @@
 		"dev": "node index.js"
 	},
 	"optionalDependencies": {
-		"@jamesukiyo/sunny-cli-linux-x64": "0.3.0",
-		"@jamesukiyo/sunny-cli-linux-arm64": "0.3.0",
-		"@jamesukiyo/sunny-cli-darwin-x64": "0.3.0",
-		"@jamesukiyo/sunny-cli-darwin-arm64": "0.3.0",
-		"@jamesukiyo/sunny-cli-windows-x64": "0.3.0",
-		"@jamesukiyo/sunny-cli-windows-arm64": "0.3.0"
+		"@jamesukiyo/sunny-cli-linux-x64": "0.3.1",
+		"@jamesukiyo/sunny-cli-linux-arm64": "0.3.1",
+		"@jamesukiyo/sunny-cli-darwin-x64": "0.3.1",
+		"@jamesukiyo/sunny-cli-darwin-arm64": "0.3.1",
+		"@jamesukiyo/sunny-cli-windows-x64": "0.3.1",
+		"@jamesukiyo/sunny-cli-windows-arm64": "0.3.1"
 	},
 	"publishConfig": {
 		"access": "public",
