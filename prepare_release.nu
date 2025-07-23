@@ -42,7 +42,7 @@ def main [--dry-run] {
     cargo check --quiet
 
     if not $dry_run {
-        git add Cargo.toml Cargo.lock $package_files
+        git add Cargo.toml Cargo.lock ...$package_files
         git commit -m $"chore: release v($new_version)"
         git tag $"v($new_version)"
         git push origin HEAD
