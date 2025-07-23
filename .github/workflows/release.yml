@@ -8,7 +8,7 @@ on:
 env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}
-    NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     CARGO_TERM_COLOR: always
 
 jobs:
@@ -149,6 +149,7 @@ jobs:
               with:
                   node-version: "20"
                   registry-url: "https://registry.npmjs.org"
+                  scope: "@jamesukiyo"
 
             - name: Download all artifacts
               uses: actions/download-artifact@v4
@@ -176,15 +177,13 @@ jobs:
                     cd ../..
                   done
               env:
-                  NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
             - name: Publish main package
               run: |
                   echo "Publishing @jamesukiyo/sunny-cli"
                   cd packages/base
                   npm publish --access public
-              env:
-                  NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
 
     github-release:
         name: Create GitHub Release
