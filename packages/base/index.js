@@ -21,7 +21,7 @@ function get_exe_path() {
 
 	try {
 		return require.resolve(
-			`@jamesukiyo/sunny-cli-${os}-${arch}/bin/sunny${extension}`,
+			`@jamesukiyo/sunny-cli-${os}-${arch}/sunny${extension}`,
 		);
 	} catch (e) {
 		throw new Error(

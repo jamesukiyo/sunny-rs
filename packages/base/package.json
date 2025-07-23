@@ -1,5 +1,7 @@
 {
 	"name": "@jamesukiyo/sunny-cli",
+	"version": "0.3.0",
+	"author": "James Plummer <jamesp2001@live.co.uk>",
 	"description": "Check the weather from your terminal.",
 	"keywords": [
 		"cli",
@@ -15,14 +17,12 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/jamesukiyo/sunny-rs.git"
-		"directory": "npm/app"
+		"url": "git+https://github.com/jamesukiyo/sunny-rs.git",
+		"directory": "packages/base"
 	},
 	"bugs": {
 		"url": "https://github.com/jamesukiyo/sunny-rs/issues"
 	},
-	"version": "0.3.0",
-	"bin": "lib/index.js",
 	"scripts": {
 		"dev": "node index.js"
 	},
@@ -33,5 +33,8 @@
 		"@jamesukiyo/sunny-cli-darwin-arm64": "0.3.0",
 		"@jamesukiyo/sunny-cli-windows-x64": "0.3.0",
 		"@jamesukiyo/sunny-cli-windows-arm64": "0.3.0"
+	},
+	"publishConfig": {
+		"access": "public"
 	}
 }

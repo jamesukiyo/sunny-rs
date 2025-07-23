@@ -12,13 +12,22 @@
 		"arm64"
 	],
 	"os": [
-		"darwin",
+		"darwin"
+	],
+	"cpu": [
+		"arm64"
 	],
 	"license": "MIT",
+	"bin": {
+		"sunny": "sunny"
+	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/jamesukiyo/sunny-rs.git"
+		"url": "git+https://github.com/jamesukiyo/sunny-rs.git",
 		"directory": "packages/sunny-cli-darwin-arm64"
+	},
+	"bugs": {
+		"url": "https://github.com/jamesukiyo/sunny-rs/issues"
 	},
 	"publishConfig": {
 		"access": "public",

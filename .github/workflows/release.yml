@@ -8,25 +8,14 @@ on:
 env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}
+    NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     CARGO_TERM_COLOR: always
 
 jobs:
-    build:
-        name: Build
-        needs: lint
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-            - uses: moonrepo/setup-rust@v1
-              with:
-                  channel: stable
-                  cache-base: "^master$"
-            - run: cargo build
-
     fmt-check:
         name: Format Check
         runs-on: ubuntu-latest
-        continue-on-error: true # avoid failing CI for trivial formatting errors
+        continue-on-error: true
         steps:
             - uses: actions/checkout@v4
             - uses: moonrepo/setup-rust@v1
@@ -46,11 +35,93 @@ jobs:
                   channel: stable
                   components: clippy
                   cache-base: "^master$"
-            - run: cargo clippy
+            - run: cargo clippy -- -D warnings
 
-    publish:
-        name: Publish
-        needs: [build, lint]
+    build-cross-platform:
+        name: Build ${{ matrix.build.NAME }}
+        needs: lint
+        runs-on: ${{ matrix.build.OS }}
+        strategy:
+            fail-fast: false
+            matrix:
+                build:
+                    - {
+                          NAME: linux-x64,
+                          OS: ubuntu-latest,
+                          TOOLCHAIN: stable,
+                          TARGET: x86_64-unknown-linux-gnu,
+                      }
+                    - {
+                          NAME: linux-arm64,
+                          OS: ubuntu-latest,
+                          TOOLCHAIN: stable,
+                          TARGET: aarch64-unknown-linux-gnu,
+                      }
+                    - {
+                          NAME: windows-x64,
+                          OS: windows-2022,
+                          TOOLCHAIN: stable,
+                          TARGET: x86_64-pc-windows-msvc,
+                      }
+                    - {
+                          NAME: windows-arm64,
+                          OS: windows-2022,
+                          TOOLCHAIN: stable,
+                          TARGET: aarch64-pc-windows-msvc,
+                      }
+                    - {
+                          NAME: darwin-x64,
+                          OS: macos-14,
+                          TOOLCHAIN: stable,
+                          TARGET: x86_64-apple-darwin,
+                      }
+                    - {
+                          NAME: darwin-arm64,
+                          OS: macos-14,
+                          TOOLCHAIN: stable,
+                          TARGET: aarch64-apple-darwin,
+                      }
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: moonrepo/setup-rust@v1
+              with:
+                  channel: ${{ matrix.build.TOOLCHAIN }}
+                  cache-base: "^master$"
+                  targets: ${{ matrix.build.TARGET }}
+
+            - name: Install cross-compilation dependencies
+              if: matrix.build.TARGET == 'aarch64-unknown-linux-gnu'
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y gcc-aarch64-linux-gnu
+
+            - name: Build binary
+              run: cargo build --release --locked --target ${{ matrix.build.TARGET }}
+
+            - name: Prepare binary (Unix)
+              if: matrix.build.OS != 'windows-2022'
+              run: |
+                  mkdir -p dist
+                  cp target/${{ matrix.build.TARGET }}/release/sunny dist/
+                  chmod +x dist/sunny
+
+            - name: Prepare binary (Windows)
+              if: matrix.build.OS == 'windows-2022'
+              run: |
+                  mkdir dist
+                  cp target/${{ matrix.build.TARGET }}/release/sunny.exe dist/
+
+            - name: Upload binary artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: sunny-cli-${{ matrix.build.NAME }}
+                  path: dist/
+                  retention-days: 1
+
+    publish-cargo:
+        name: Publish to Cargo
+        needs: [build-cross-platform, lint]
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
@@ -58,31 +129,93 @@ jobs:
               with:
                   channel: stable
                   cache-base: "^master$"
-            - run: "cargo publish --token $CARGO_TOKEN"
+            - name: Publish to crates.io
+              run: cargo publish --token ${{ env.CARGO_TOKEN }}
 
-    tagged-release:
-        needs: [build, publish, lint]
-        permissions:
-            id-token: write
-            contents: write
-            packages: write
+    publish-npm:
+        name: Publish NPM packages
+        needs: [build-cross-platform, lint]
         runs-on: ubuntu-latest
         steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  registry-url: "https://registry.npmjs.org"
+
+            - name: Download all artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  path: artifacts
+
+            - name: Setup npm packages
+              run: |
+                  # copy binaries to their respective package directories
+                  for platform in linux-x64 linux-arm64 windows-x64 windows-arm64 darwin-x64 darwin-arm64; do
+                    if [ -d "artifacts/sunny-cli-$platform" ]; then
+                      cp -r artifacts/sunny-cli-$platform/* packages/sunny-cli-$platform/
+                    else
+                      echo "Warning: No artifact found for $platform"
+                      exit 1
+                    fi
+                  done
+
+            - name: Publish platform packages
+              run: |
+                  for platform in linux-x64 linux-arm64 windows-x64 windows-arm64 darwin-x64 darwin-arm64; do
+                    echo "Publishing @jamesukiyo/sunny-cli-$platform"
+                    cd packages/sunny-cli-$platform
+                    npm publish --access public
+                    cd ../..
+                  done
+              env:
+                  NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
+
+            - name: Publish main package
+              run: |
+                  echo "Publishing @jamesukiyo/sunny-cli"
+                  cd packages/base
+                  npm publish --access public
+              env:
+                  NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
+
+    github-release:
+        name: Create GitHub Release
+        needs: [build-cross-platform, publish-cargo, publish-npm, lint]
+        permissions:
+            contents: write
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Download all artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  path: artifacts
+
+            - name: Create release archives
+              run: |
+                  mkdir -p release-assets
+
+                  for platform in linux-x64 linux-arm64 darwin-x64 darwin-arm64; do
+                    if [ -d "artifacts/sunny-cli-$platform" ]; then
+                      cd artifacts/sunny-cli-$platform
+                      tar -czf ../../release-assets/sunny-cli-$platform.tar.gz *
+                      cd ../..
+                    fi
+                  done
+
+                  for platform in windows-x64 windows-arm64; do
+                    if [ -d "artifacts/sunny-cli-$platform" ]; then
+                      cd artifacts/sunny-cli-$platform
+                      zip -r ../../release-assets/sunny-cli-$platform.zip *
+                      cd ../..
+                    fi
+                  done
+
             - uses: marvinpinto/action-automatic-releases@latest
               with:
                   repo_token: "${{ secrets.GITHUB_TOKEN }}"
                   prerelease: false
-
-    # test:
-    #     name: Test
-    #     runs-on: ubuntu-latest
-    #     steps:
-    #         - uses: actions/checkout@v4
-    #           with:
-    #               fetch-depth: 0
-    #         - uses: moonrepo/setup-rust@v1
-    #           with:
-    #               bins: cargo-nextest
-    #               channel: nightly
-    #               cache-base: "^master$"
-    #         - run: "cargo nextest run --workspace --no-tests=pass --retries=2"
+                  files: release-assets/*

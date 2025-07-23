@@ -11,15 +11,23 @@
 		"x64"
 	],
 	"os": [
-		"linux",
+		"linux"
+	],
+	"cpu": [
+		"x64"
 	],
 	"license": "MIT",
+	"bin": {
+		"sunny": "sunny"
+	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/jamesukiyo/sunny-rs.git"
+		"url": "git+https://github.com/jamesukiyo/sunny-rs.git",
 		"directory": "packages/sunny-cli-linux-x64"
 	},
-	"version": "0.3.0",
+	"bugs": {
+		"url": "https://github.com/jamesukiyo/sunny-rs/issues"
+	},
 	"publishConfig": {
 		"access": "public",
 		"executableFiles": [
