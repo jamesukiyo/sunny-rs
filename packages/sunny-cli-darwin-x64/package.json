@@ -1,0 +1,29 @@
+{
+	"name": "@jamesukiyo/sunny-cli-darwin-x64",
+	"version": "0.3.0",
+	"author": "James Plummer <jamesp2001@live.co.uk>",
+	"description": "MacOS x64 binary for sunny-cli.",
+	"keywords": [
+		"cli",
+		"terminal",
+		"weather",
+		"darwin",
+		"macos",
+		"x64"
+	],
+	"os": [
+		"darwin",
+	],
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/jamesukiyo/sunny-rs.git"
+		"directory": "packages/sunny-cli-darwin-x64"
+	},
+	"publishConfig": {
+		"access": "public",
+		"executableFiles": [
+			"sunny"
+		]
+	}
+}

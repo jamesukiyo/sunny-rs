@@ -1,0 +1,37 @@
+{
+	"name": "@jamesukiyo/sunny-cli",
+	"description": "Check the weather from your terminal.",
+	"keywords": [
+		"cli",
+		"terminal",
+		"weather"
+	],
+	"files": [
+		"index.js"
+	],
+	"license": "MIT",
+	"bin": {
+		"sunny": "index.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/jamesukiyo/sunny-rs.git"
+		"directory": "npm/app"
+	},
+	"bugs": {
+		"url": "https://github.com/jamesukiyo/sunny-rs/issues"
+	},
+	"version": "0.3.0",
+	"bin": "lib/index.js",
+	"scripts": {
+		"dev": "node index.js"
+	},
+	"optionalDependencies": {
+		"@jamesukiyo/sunny-cli-linux-x64": "0.3.0",
+		"@jamesukiyo/sunny-cli-linux-arm64": "0.3.0",
+		"@jamesukiyo/sunny-cli-darwin-x64": "0.3.0",
+		"@jamesukiyo/sunny-cli-darwin-arm64": "0.3.0",
+		"@jamesukiyo/sunny-cli-windows-x64": "0.3.0",
+		"@jamesukiyo/sunny-cli-windows-arm64": "0.3.0"
+	}
+}

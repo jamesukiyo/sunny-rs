@@ -1,0 +1,29 @@
+{
+	"name": "@jamesukiyo/sunny-cli-linux-arm64",
+	"version": "0.3.0",
+	"author": "James Plummer <jamesp2001@live.co.uk>",
+	"description": "Linux arm64 binary for sunny-cli.",
+	"keywords": [
+		"cli",
+		"terminal",
+		"weather",
+		"linux",
+		"arm64"
+	],
+	"os": [
+		"linux",
+	],
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/jamesukiyo/sunny-rs.git"
+		"directory": "packages/sunny-cli-linux-arm64"
+	},
+	"version": "0.3.0",
+	"publishConfig": {
+		"access": "public",
+		"executableFiles": [
+			"sunny"
+		]
+	}
+}
