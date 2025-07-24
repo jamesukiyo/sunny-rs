@@ -47,15 +47,15 @@ Inside it you can set the following:
 - `show_header`: whether to show the header [default: true]
 - `icons`: whether to enable nerd font and emoji icons [default: true]
 
->[!INFO]
+> [!IMPORTANT]
 > If icons are enabled, an emoji is tried first if supported and then a nerd
 > font icon. If neither work, the layout may be incorrect so try disabling icons
 > or trying a nerd font.
 
 See `example_config.toml` for an example.
 
->[!HINT]
-> CLI arguments will override corresponding config values.
+> [!TIP]
+> CLI arguments can and will override corresponding config values.
 
 I recommend using the config file. Then you can run `sunny` without any
 arguments and see the weather quickly for today.
