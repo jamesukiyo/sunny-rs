@@ -1,6 +1,6 @@
 {
 	"name": "@jamesukiyo/sunny-cli-windows-x64",
-	"version": "0.3.2",
+	"version": "0.3.3",
 	"author": "James Plummer <jamesp2001@live.co.uk>",
 	"description": "Windows x64 binary for sunny-cli.",
 	"keywords": [
