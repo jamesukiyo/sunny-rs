@@ -48,7 +48,11 @@ pub struct ForecastItem {
 	pub dt_txt: String,
 }
 
-pub fn fetch_weather(city: &str, api_key: &str, is_tomorrow: bool) -> Result<WeatherResponse> {
+pub fn fetch_weather(
+	city: &str,
+	api_key: &str,
+	is_tomorrow: bool,
+) -> Result<WeatherResponse> {
 	let endpoint = if is_tomorrow { "forecast" } else { "weather" };
 	let url = format!(
 		"https://api.openweathermap.org/data/2.5/{endpoint}?q={city}&appid={api_key}"
