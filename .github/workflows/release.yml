@@ -161,29 +161,98 @@ jobs:
                   # copy binaries to their respective package directories
                   for platform in linux-x64 linux-arm64 windows-x64 windows-arm64 darwin-x64 darwin-arm64; do
                     if [ -d "artifacts/sunny-cli-$platform" ]; then
-                      cp -r artifacts/sunny-cli-$platform/* packages/sunny-cli-$platform/
+                      echo "Copying binaries for $platform"
+                      cp -v artifacts/sunny-cli-$platform/* packages/sunny-cli-$platform/
+                      ls -la packages/sunny-cli-$platform/
                     else
-                      echo "Warning: No artifact found for $platform"
+                      echo "Error: No artifact found for $platform"
                       exit 1
                     fi
                   done
 
             - name: Publish platform packages
               run: |
+                  publish_with_retry() {
+                    local package_dir=$1
+                    local max_attempts=5
+                    local attempt=1
+                    local base_delay=10
+
+                    while [ $attempt -le $max_attempts ]; do
+                      echo "Attempt $attempt/$max_attempts: Publishing $(basename $package_dir)"
+                      cd "$package_dir"
+
+                      if npm publish --access public; then
+                        echo "Successfully published $(basename $package_dir)"
+                        cd ../..
+                        return 0
+                      else
+                        echo "Failed to publish $(basename $package_dir) (attempt $attempt)"
+                        cd ../..
+
+                        if [ $attempt -lt $max_attempts ]; then
+                          local delay=$((base_delay * attempt))
+                          echo "Waiting ${delay}s before retry..."
+                          sleep $delay
+                        fi
+                      fi
+
+                      attempt=$((attempt + 1))
+                    done
+
+                    echo "Failed to publish $(basename $package_dir) after $max_attempts attempts"
+                    return 1
+                  }
+
                   for platform in linux-x64 linux-arm64 windows-x64 windows-arm64 darwin-x64 darwin-arm64; do
-                    echo "Publishing @jamesukiyo/sunny-cli-$platform"
-                    cd packages/sunny-cli-$platform
-                    npm publish --access public
-                    cd ../..
+                    if publish_with_retry "packages/sunny-cli-$platform"; then
+                      echo "Waiting 30s before next package to avoid rate limits..."
+                      sleep 30
+                    else
+                      echo "Failed to publish sunny-cli-$platform"
+                      exit 1
+                    fi
                   done
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
             - name: Publish main package
               run: |
-                  echo "Publishing @jamesukiyo/sunny-cli"
-                  cd packages/base
-                  npm publish --access public
+                  publish_with_retry() {
+                    local package_dir=$1
+                    local max_attempts=5
+                    local attempt=1
+                    local base_delay=10
+
+                    while [ $attempt -le $max_attempts ]; do
+                      echo "Attempt $attempt/$max_attempts: Publishing main package"
+                      cd "$package_dir"
+
+                      if npm publish --access public; then
+                        echo "Successfully published main package"
+                        cd ../..
+                        return 0
+                      else
+                        echo "Failed to publish main package (attempt $attempt)"
+                        cd ../..
+
+                        if [ $attempt -lt $max_attempts ]; then
+                          local delay=$((base_delay * attempt))
+                          echo "Waiting ${delay}s before retry..."
+                          sleep $delay
+                        fi
+                      fi
+
+                      attempt=$((attempt + 1))
+                    done
+
+                    echo "Failed to publish main package after $max_attempts attempts"
+                    return 1
+                  }
+
+                  echo "Waiting 60s before publishing main package..."
+                  sleep 60
+                  publish_with_retry "packages/base"
 
     github-release:
         name: Create GitHub Release

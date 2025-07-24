@@ -17,6 +17,9 @@
 	"cpu": [
 		"arm64"
 	],
+	"files": [
+		"sunny"
+	],
 	"license": "MIT",
 	"bin": {
 		"sunny": "sunny"

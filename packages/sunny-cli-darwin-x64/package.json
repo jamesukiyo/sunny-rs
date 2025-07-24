@@ -17,6 +17,9 @@
 	"cpu": [
 		"x64"
 	],
+	"files": [
+		"sunny"
+	],
 	"license": "MIT",
 	"bin": {
 		"sunny": "sunny"
