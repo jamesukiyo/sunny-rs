@@ -125,81 +125,81 @@ jobs:
             - name: Publish to crates.io
               run: cargo publish --token ${{ env.CARGO_TOKEN }}
 
-    # publish-npm:
-    #     name: Publish NPM packages
-    #     needs: [build-cross-platform, lint]
-    #     runs-on: ubuntu-latest
-    #     steps:
-    #         - uses: actions/checkout@v4
-    #
-    #         - uses: actions/setup-node@v4
-    #           with:
-    #               node-version: "20"
-    #               registry-url: "https://registry.npmjs.org"
-    #               scope: "@jamesukiyo"
-    #
-    #         - name: Download all binary artifacts
-    #           uses: actions/download-artifact@v4
-    #           with:
-    #               path: artifacts
-    #               pattern: binary-*
-    #
-    #         - name: Create npm package with all binaries
-    #           run: |
-    #               VERSION=$(grep '"version"' packages/npm/package.json | cut -d'"' -f4)
-    #
-    #               # Create npm package
-    #               mkdir -p npm-package
-    #               cp -r packages/npm/* npm-package/
-    #
-    #               cp README.md npm-package/
-    #
-    #               # Add binaries to platform directories
-    #               for artifact_dir in artifacts/binary-*; do
-    #                 platform=$(basename "$artifact_dir" | sed 's/binary-//' | tr '-' '_')
-    #                 target_dir="npm-package/sunny-cli-$VERSION-$platform"
-    #                 mkdir -p "$target_dir"
-    #                 cp "$artifact_dir"/sunny* "$target_dir/"
-    #                 chmod +x "$target_dir"/sunny* 2>/dev/null || true
-    #               done
-    #
-    #               ls -la npm-package/
-    #
-    #         - name: Publish main package
-    #           run: |
-    #               publish_with_retry() {
-    #                 local package_dir=$1
-    #                 local max_attempts=5
-    #                 local attempt=1
-    #                 local base_delay=10
-    #
-    #                 while [ $attempt -le $max_attempts ]; do
-    #                   echo "Attempt $attempt/$max_attempts: Publishing main package"
-    #                   cd "$package_dir"
-    #
-    #                   if npm publish --access public; then
-    #                     echo "Successfully published main package"
-    #                     cd ../..
-    #                     return 0
-    #                   else
-    #                     echo "Failed to publish main package (attempt $attempt)"
-    #                     cd ../..
-    #
-    #                     if [ $attempt -lt $max_attempts ]; then
-    #                       local delay=$((base_delay * attempt))
-    #                       echo "Waiting ${delay}s before retry..."
-    #                       sleep $delay
-    #                     fi
-    #                   fi
-    #
-    #                   attempt=$((attempt + 1))
-    #                 done
-    #
-    #                 echo "Failed to publish main package after $max_attempts attempts"
-    #                 return 1
-    #               }
-    #
-    #               publish_with_retry "npm-package"
+    publish-npm:
+        name: Publish NPM packages
+        needs: [build-cross-platform, lint]
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  registry-url: "https://registry.npmjs.org"
+                  scope: "@jamesukiyo"
+
+            - name: Download all binary artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  path: artifacts
+                  pattern: binary-*
+
+            - name: Create npm package with all binaries
+              run: |
+                  VERSION=$(grep '"version"' packages/npm/package.json | cut -d'"' -f4)
+
+                  # Create npm package
+                  mkdir -p npm-package
+                  cp -r packages/npm/* npm-package/
+
+                  cp README.md npm-package/
+
+                  # Add binaries to platform directories
+                  for artifact_dir in artifacts/binary-*; do
+                    platform=$(basename "$artifact_dir" | sed 's/binary-//' | tr '-' '_')
+                    target_dir="npm-package/sunny-cli-$VERSION-$platform"
+                    mkdir -p "$target_dir"
+                    cp "$artifact_dir"/sunny* "$target_dir/"
+                    chmod +x "$target_dir"/sunny* 2>/dev/null || true
+                  done
+
+                  ls -la npm-package/
+
+            - name: Publish main package
+              run: |
+                  publish_with_retry() {
+                    local package_dir=$1
+                    local max_attempts=5
+                    local attempt=1
+                    local base_delay=10
+
+                    while [ $attempt -le $max_attempts ]; do
+                      echo "Attempt $attempt/$max_attempts: Publishing main package"
+                      cd "$package_dir"
+
+                      if npm publish --access public; then
+                        echo "Successfully published main package"
+                        cd ../..
+                        return 0
+                      else
+                        echo "Failed to publish main package (attempt $attempt)"
+                        cd ../..
+
+                        if [ $attempt -lt $max_attempts ]; then
+                          local delay=$((base_delay * attempt))
+                          echo "Waiting ${delay}s before retry..."
+                          sleep $delay
+                        fi
+                      fi
+
+                      attempt=$((attempt + 1))
+                    done
+
+                    echo "Failed to publish main package after $max_attempts attempts"
+                    return 1
+                  }
+
+                  publish_with_retry "npm-package"
 
     update-scoop:
         name: Update Scoop Manifest
@@ -257,8 +257,14 @@ jobs:
 
     github-release:
         name: Create GitHub Release
-        # needs: [build-cross-platform, publish-cargo, publish-npm, update-scoop, lint]
-        needs: [build-cross-platform, update-scoop, lint]
+        needs:
+            [
+                build-cross-platform,
+                publish-cargo,
+                publish-npm,
+                update-scoop,
+                lint,
+            ]
         permissions:
             contents: write
         runs-on: ubuntu-latest
