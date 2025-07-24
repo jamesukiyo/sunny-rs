@@ -1,3 +1,20 @@
+<a id="v0.4.0"></a>
+## [v0.4.0](https://github.com/jamesukiyo/sunny-rs/releases/tag/v0.4.0) - 2025-07-24
+
+## Features
+- tomorrows weather can now be fetched via subcommand ([James Plummer](https://github.com/jamesukiyo/sunny-rs/commit/a432f0b924982337d6937977d3ba2e5213afa74e))
+
+## Builds
+- simplify npm publish with unified package ([James Plummer](https://github.com/jamesukiyo/sunny-rs/commit/737f251ef0a9b66f6ea11ee5a89b3087216dfa65))
+- should fix builds for npm ([James Plummer](https://github.com/jamesukiyo/sunny-rs/commit/de60c48eb6a7b6e5d9454cca7a7df7be1d846929))
+
+## Chores
+- update changelog for v0.3.3 ([jamesukiyo](https://github.com/jamesukiyo/sunny-rs/commit/f8fc6db9b4e4f22da7a792af8ac2bcfb37f87527))
+- release v0.4.0 ([James Plummer](https://github.com/jamesukiyo/sunny-rs/commit/b347833ad075cc5d6e29e15a6d6371615ef78401))
+
+[Changes][v0.4.0]
+
+
 <a id="v0.3.3"></a>
 ## [v0.3.3](https://github.com/jamesukiyo/sunny-rs/releases/tag/v0.3.3) - 2025-07-24
 
@@ -80,6 +97,7 @@ trying to publish to npm, ignore this, there are no actual changes.
 [Changes][v0.1.0]
 
 
+[v0.4.0]: https://github.com/jamesukiyo/sunny-rs/compare/v0.3.3...v0.4.0
 [v0.3.3]: https://github.com/jamesukiyo/sunny-rs/compare/v0.3.2...v0.3.3
 [v0.3.2]: https://github.com/jamesukiyo/sunny-rs/compare/v0.3.1...v0.3.2
 [v0.3.1]: https://github.com/jamesukiyo/sunny-rs/compare/v0.3.0...v0.3.1
