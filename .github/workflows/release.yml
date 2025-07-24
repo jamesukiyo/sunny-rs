@@ -105,48 +105,26 @@ jobs:
                   AR_aarch64_unknown_linux_gnu: ${{ matrix.build.TARGET == 'aarch64-unknown-linux-gnu' && 'aarch64-linux-gnu-ar' || '' }}
                   CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: ${{ matrix.build.TARGET == 'aarch64-unknown-linux-gnu' && 'aarch64-linux-gnu-gcc' || '' }}
 
-            - name: Prepare binary for npm package (Unix)
-              if: matrix.build.OS != 'windows-latest'
-              run: |
-                  # Get version for directory naming
-                  VERSION=$(grep '"version"' packages/npm/package.json | cut -d'"' -f4)
-                  PLATFORM_DIR=$(echo ${{ matrix.build.NAME }} | tr '-' '_')
-                  TARGET_DIR="packages/npm/sunny-cli-$VERSION-$PLATFORM_DIR"
-                  
-                  mkdir -p "$TARGET_DIR"
-                  cp target/${{ matrix.build.TARGET }}/release/sunny "$TARGET_DIR/"
-                  chmod +x "$TARGET_DIR/sunny"
-
-            - name: Prepare binary for npm package (Windows)
-              if: matrix.build.OS == 'windows-latest'
-              run: |
-                  # Get version for directory naming  
-                  $VERSION = (Get-Content packages/npm/package.json | ConvertFrom-Json).version
-                  $PLATFORM_DIR = "${{ matrix.build.NAME }}".Replace('-', '_')
-                  $TARGET_DIR = "packages/npm/sunny-cli-$VERSION-$PLATFORM_DIR"
-                  
-                  New-Item -ItemType Directory -Force -Path $TARGET_DIR
-                  Copy-Item "target/${{ matrix.build.TARGET }}/release/sunny.exe" "$TARGET_DIR/"
-
-            - name: Upload npm package directory
+            - name: Upload binary
               uses: actions/upload-artifact@v4
               with:
-                  name: npm-package-${{ matrix.build.NAME }}
-                  path: packages/npm/
+                  name: binary-${{ matrix.build.NAME }}
+                  path: target/${{ matrix.build.TARGET }}/release/sunny*
                   retention-days: 1
 
-    publish-cargo:
-        name: Publish to Cargo
-        needs: [build-cross-platform, lint]
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-            - uses: moonrepo/setup-rust@v1
-              with:
-                  channel: stable
-                  cache-base: "^master$"
-            - name: Publish to crates.io
-              run: cargo publish --token ${{ env.CARGO_TOKEN }}
+    # disabled for 0.4.0 (already on cargo)
+    # publish-cargo:
+    #     name: Publish to Cargo
+    #     needs: [build-cross-platform, lint]
+    #     runs-on: ubuntu-latest
+    #     steps:
+    #         - uses: actions/checkout@v4
+    #         - uses: moonrepo/setup-rust@v1
+    #           with:
+    #               channel: stable
+    #               cache-base: "^master$"
+    #         - name: Publish to crates.io
+    #           run: cargo publish --token ${{ env.CARGO_TOKEN }}
 
     publish-npm:
         name: Publish NPM packages
@@ -161,28 +139,33 @@ jobs:
                   registry-url: "https://registry.npmjs.org"
                   scope: "@jamesukiyo"
 
-            - name: Download all npm package artifacts
+            - name: Download all binary artifacts
               uses: actions/download-artifact@v4
               with:
                   path: artifacts
+                  pattern: binary-*
 
-            - name: Merge npm package with all binaries
+            - name: Create npm package with all binaries
               run: |
-                  echo "Merging all platform binaries into single npm package..."
+                  VERSION=$(grep '"version"' packages/npm/package.json | cut -d'"' -f4)
                   
-                  # Start with base npm package (contains package.json, cli.js, index.js)
-                  cp -r artifacts/npm-package-linux-x64/packages/npm ./packages/
+                  # Create npm package
+                  mkdir -p npm-package
+                  cp -r packages/npm/* npm-package/
                   
-                  # Merge binary directories from all other platforms
-                  for artifact_dir in artifacts/npm-package-*; do
-                    if [ -d "$artifact_dir/packages/npm" ]; then
-                      echo "Merging binaries from $artifact_dir"
-                      find "$artifact_dir/packages/npm" -name "sunny-cli-*" -type d -exec cp -r {} packages/npm/ \;
-                    fi
+                  # Copy README
+                  cp README.md npm-package/
+                  
+                  # Add binaries to platform directories
+                  for artifact_dir in artifacts/binary-*; do
+                    platform=$(basename "$artifact_dir" | sed 's/binary-//' | tr '-' '_')
+                    target_dir="npm-package/sunny-cli-$VERSION-$platform"
+                    mkdir -p "$target_dir"
+                    cp "$artifact_dir"/sunny* "$target_dir/"
+                    chmod +x "$target_dir"/sunny* 2>/dev/null || true
                   done
                   
-                  echo "Final npm package contents:"
-                  find packages/npm -name "sunny-cli-*" -type d -exec ls -la {} \;
+                  ls -la npm-package/
 
             - name: Publish main package
               run: |
@@ -218,40 +201,42 @@ jobs:
                     return 1
                   }
 
-                  publish_with_retry "packages/npm"
+                  publish_with_retry "npm-package"
 
     github-release:
         name: Create GitHub Release
-        needs: [build-cross-platform, publish-cargo, publish-npm, lint]
+        # temporarily disabled for 0.4.0 (already on cargo)
+        # needs: [build-cross-platform, publish-cargo, publish-npm, lint]
+        needs: [build-cross-platform, publish-npm, lint]
         permissions:
             contents: write
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
 
-            - name: Download all npm package artifacts for release  
+            - name: Download all binary artifacts for release
               uses: actions/download-artifact@v4
               with:
                   path: artifacts
-                  pattern: npm-package-*
+                  pattern: binary-*
 
-            - name: Create release archives from npm packages
+            - name: Create release archives from binary artifacts
               run: |
                   mkdir -p release-assets
-                  
-                  # Extract binaries from npm package artifacts for release
-                  for artifact_dir in artifacts/npm-package-*; do
-                    platform=$(basename "$artifact_dir" | sed 's/npm-package-//')
+
+                  # Create archives from binary artifacts for release
+                  for artifact_dir in artifacts/binary-*; do
+                    platform=$(basename "$artifact_dir" | sed 's/binary-//')
                     echo "Creating release archive for $platform"
-                    
+
                     # Find the binary directory in this artifact
-                    binary_dir=$(find "$artifact_dir/packages/npm" -name "sunny-cli-*-*" -type d | head -n1)
+                    binary_dir=$(find "$artifact_dir" -name "sunny-cli-*" -type d | head -n1)
                     if [ -n "$binary_dir" ]; then
                       cd "$binary_dir"
                       if [[ "$platform" == *"windows"* ]]; then
-                        zip -r "../../../release-assets/sunny-cli-$platform.zip" *
+                        zip -r "../../release-assets/sunny-cli-$platform.zip" *
                       else
-                        tar -czf "../../../release-assets/sunny-cli-$platform.tar.gz" *
+                        tar -czf "../../release-assets/sunny-cli-$platform.tar.gz" *
                       fi
                       cd - > /dev/null
                     fi
