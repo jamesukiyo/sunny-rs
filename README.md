@@ -17,13 +17,23 @@
 ## Usage
 
 ### Install
+With cargo:
 ```sh
 cargo install sunny-cli
+```
+
+With npm/bun/pnpm:
+```sh
+npm install -g @jamesukiyo/sunny-cli
+bun install -g @jamesukiyo/sunny-cli
+pnpm install -g @jamesukiyo/sunny-cli
 ```
 
 You will need a free API key from [OpenWeatherMap](https://openweathermap.org/api).
 
 A nerd font and terminal that supports emojis is recommended (see below).
+
+See the [#run](#run) section for info on how to use sunny.
 
 ### Config
 
@@ -59,7 +69,7 @@ sunny paris  # allows override
 
 ### Run
 
-Examples:
+For cargo installations:
 ```sh
 sunny                   # today (city in config)
 sunny t                 # tomorrow (city in config)
@@ -68,6 +78,14 @@ sunny tomorrow paris    # tomorrow in paris
 sunny paris --simple    # today in paris, simple output
 sunny t paris --simple  # tomorrow in paris, simple output
 ```
+
+For npm/bun/pnpm installations prefix with your package managers executor:
+```sh
+npx sunny
+bunx sunny
+pnpx sunny
+```
+
 
 Full help:
 ```
