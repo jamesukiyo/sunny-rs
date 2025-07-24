@@ -1,6 +1,6 @@
 {
 	"name": "@jamesukiyo/sunny-cli",
-	"version": "0.4.0",
+	"version": "0.4.1",
 	"author": "James Plummer <jamesp2001@live.co.uk>",
 	"description": "Check the weather from your terminal.",
 	"keywords": [
