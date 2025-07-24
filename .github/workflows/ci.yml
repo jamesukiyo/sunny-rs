@@ -35,7 +35,7 @@ jobs:
               with:
                   channel: nightly
                   components: rustfmt
-                  cache-base: "^trunk$"
+                  cache-base: "^master$"
             - run: cargo fmt --check
 
     lint:
@@ -61,5 +61,5 @@ jobs:
     #           with:
     #               bins: cargo-nextest
     #               channel: nightly
-    #               cache-base: "^trunk$"
+    #               cache-base: "^master$"
     #         - run: "cargo nextest run --workspace --no-tests=pass --retries=2"
