@@ -105,24 +105,34 @@ jobs:
                   AR_aarch64_unknown_linux_gnu: ${{ matrix.build.TARGET == 'aarch64-unknown-linux-gnu' && 'aarch64-linux-gnu-ar' || '' }}
                   CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: ${{ matrix.build.TARGET == 'aarch64-unknown-linux-gnu' && 'aarch64-linux-gnu-gcc' || '' }}
 
-            - name: Prepare binary (Unix)
+            - name: Prepare binary for npm package (Unix)
               if: matrix.build.OS != 'windows-latest'
               run: |
-                  mkdir -p dist
-                  cp target/${{ matrix.build.TARGET }}/release/sunny dist/
-                  chmod +x dist/sunny
+                  # Get version for directory naming
+                  VERSION=$(grep '"version"' packages/npm/package.json | cut -d'"' -f4)
+                  PLATFORM_DIR=$(echo ${{ matrix.build.NAME }} | tr '-' '_')
+                  TARGET_DIR="packages/npm/sunny-cli-$VERSION-$PLATFORM_DIR"
+                  
+                  mkdir -p "$TARGET_DIR"
+                  cp target/${{ matrix.build.TARGET }}/release/sunny "$TARGET_DIR/"
+                  chmod +x "$TARGET_DIR/sunny"
 
-            - name: Prepare binary (Windows)
+            - name: Prepare binary for npm package (Windows)
               if: matrix.build.OS == 'windows-latest'
               run: |
-                  mkdir dist
-                  cp target/${{ matrix.build.TARGET }}/release/sunny.exe dist/
+                  # Get version for directory naming  
+                  $VERSION = (Get-Content packages/npm/package.json | ConvertFrom-Json).version
+                  $PLATFORM_DIR = "${{ matrix.build.NAME }}".Replace('-', '_')
+                  $TARGET_DIR = "packages/npm/sunny-cli-$VERSION-$PLATFORM_DIR"
+                  
+                  New-Item -ItemType Directory -Force -Path $TARGET_DIR
+                  Copy-Item "target/${{ matrix.build.TARGET }}/release/sunny.exe" "$TARGET_DIR/"
 
-            - name: Upload binary artifact
+            - name: Upload npm package directory
               uses: actions/upload-artifact@v4
               with:
-                  name: sunny-cli-${{ matrix.build.NAME }}
-                  path: dist/
+                  name: npm-package-${{ matrix.build.NAME }}
+                  path: packages/npm/
                   retention-days: 1
 
     publish-cargo:
@@ -151,70 +161,28 @@ jobs:
                   registry-url: "https://registry.npmjs.org"
                   scope: "@jamesukiyo"
 
-            - name: Download all artifacts
+            - name: Download all npm package artifacts
               uses: actions/download-artifact@v4
               with:
                   path: artifacts
 
-            - name: Setup npm packages
+            - name: Merge npm package with all binaries
               run: |
-                  # copy binaries to their respective package directories
-                  for platform in linux-x64 linux-arm64 windows-x64 windows-arm64 darwin-x64 darwin-arm64; do
-                    if [ -d "artifacts/sunny-cli-$platform" ]; then
-                      echo "Copying binaries for $platform"
-                      cp -v artifacts/sunny-cli-$platform/* packages/sunny-cli-$platform/
-                      ls -la packages/sunny-cli-$platform/
-                    else
-                      echo "Error: No artifact found for $platform"
-                      exit 1
+                  echo "Merging all platform binaries into single npm package..."
+                  
+                  # Start with base npm package (contains package.json, cli.js, index.js)
+                  cp -r artifacts/npm-package-linux-x64/packages/npm ./packages/
+                  
+                  # Merge binary directories from all other platforms
+                  for artifact_dir in artifacts/npm-package-*; do
+                    if [ -d "$artifact_dir/packages/npm" ]; then
+                      echo "Merging binaries from $artifact_dir"
+                      find "$artifact_dir/packages/npm" -name "sunny-cli-*" -type d -exec cp -r {} packages/npm/ \;
                     fi
                   done
-
-            - name: Publish platform packages
-              run: |
-                  publish_with_retry() {
-                    local package_dir=$1
-                    local max_attempts=5
-                    local attempt=1
-                    local base_delay=10
-
-                    while [ $attempt -le $max_attempts ]; do
-                      echo "Attempt $attempt/$max_attempts: Publishing $(basename $package_dir)"
-                      cd "$package_dir"
-
-                      if npm publish --access public; then
-                        echo "Successfully published $(basename $package_dir)"
-                        cd ../..
-                        return 0
-                      else
-                        echo "Failed to publish $(basename $package_dir) (attempt $attempt)"
-                        cd ../..
-
-                        if [ $attempt -lt $max_attempts ]; then
-                          local delay=$((base_delay * attempt))
-                          echo "Waiting ${delay}s before retry..."
-                          sleep $delay
-                        fi
-                      fi
-
-                      attempt=$((attempt + 1))
-                    done
-
-                    echo "Failed to publish $(basename $package_dir) after $max_attempts attempts"
-                    return 1
-                  }
-
-                  for platform in linux-x64 linux-arm64 windows-x64 windows-arm64 darwin-x64 darwin-arm64; do
-                    if publish_with_retry "packages/sunny-cli-$platform"; then
-                      echo "Waiting 30s before next package to avoid rate limits..."
-                      sleep 30
-                    else
-                      echo "Failed to publish sunny-cli-$platform"
-                      exit 1
-                    fi
-                  done
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+                  
+                  echo "Final npm package contents:"
+                  find packages/npm -name "sunny-cli-*" -type d -exec ls -la {} \;
 
             - name: Publish main package
               run: |
@@ -250,9 +218,7 @@ jobs:
                     return 1
                   }
 
-                  echo "Waiting 60s before publishing main package..."
-                  sleep 60
-                  publish_with_retry "packages/base"
+                  publish_with_retry "packages/npm"
 
     github-release:
         name: Create GitHub Release
@@ -263,28 +229,31 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - name: Download all artifacts
+            - name: Download all npm package artifacts for release  
               uses: actions/download-artifact@v4
               with:
                   path: artifacts
+                  pattern: npm-package-*
 
-            - name: Create release archives
+            - name: Create release archives from npm packages
               run: |
                   mkdir -p release-assets
-
-                  for platform in linux-x64 linux-arm64 darwin-x64 darwin-arm64; do
-                    if [ -d "artifacts/sunny-cli-$platform" ]; then
-                      cd artifacts/sunny-cli-$platform
-                      tar -czf ../../release-assets/sunny-cli-$platform.tar.gz *
-                      cd ../..
-                    fi
-                  done
-
-                  for platform in windows-x64 windows-arm64; do
-                    if [ -d "artifacts/sunny-cli-$platform" ]; then
-                      cd artifacts/sunny-cli-$platform
-                      zip -r ../../release-assets/sunny-cli-$platform.zip *
-                      cd ../..
+                  
+                  # Extract binaries from npm package artifacts for release
+                  for artifact_dir in artifacts/npm-package-*; do
+                    platform=$(basename "$artifact_dir" | sed 's/npm-package-//')
+                    echo "Creating release archive for $platform"
+                    
+                    # Find the binary directory in this artifact
+                    binary_dir=$(find "$artifact_dir/packages/npm" -name "sunny-cli-*-*" -type d | head -n1)
+                    if [ -n "$binary_dir" ]; then
+                      cd "$binary_dir"
+                      if [[ "$platform" == *"windows"* ]]; then
+                        zip -r "../../../release-assets/sunny-cli-$platform.zip" *
+                      else
+                        tar -czf "../../../release-assets/sunny-cli-$platform.tar.gz" *
+                      fi
+                      cd - > /dev/null
                     fi
                   done
 

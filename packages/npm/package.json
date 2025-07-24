@@ -9,24 +9,25 @@
 		"weather"
 	],
 	"files": [
-		"index.js",
-		"postinstall.js"
+		"sunny-cli-*/sunny",
+		"sunny-cli-*/sunny.exe",
+		"cli.js",
+		"index.js"
 	],
 	"license": "MIT",
 	"bin": {
-		"sunny": "index.js"
+		"sunny": "cli.js"
 	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/jamesukiyo/sunny-rs.git",
-		"directory": "packages/base"
+		"directory": "packages/npm"
 	},
 	"bugs": {
 		"url": "https://github.com/jamesukiyo/sunny-rs/issues"
 	},
 	"scripts": {
-		"dev": "node index.js",
-		"postinstall": "node postinstall.js"
+		"dev": "node cli.js"
 	},
 	"publishConfig": {
 		"access": "public",
