@@ -16,7 +16,7 @@ impl HeaderFooter {
 	}
 }
 
-static COLOURS: [(u8, u8, u8); 11] = [
+static COLOURS: [(u8, u8, u8); 12] = [
 	(255, 255, 0),   // bright sunny yellow
 	(255, 240, 50),  // light yellow
 	(255, 220, 100), // golden yellow
@@ -28,6 +28,7 @@ static COLOURS: [(u8, u8, u8); 11] = [
 	(220, 100, 220), // light purple
 	(200, 100, 240), // lavender purple
 	(180, 120, 250), // light summer purple
+	(160, 140, 255), // dark summer purple
 ];
 
 fn create_box_line(
@@ -92,6 +93,14 @@ pub fn printer(opts: &PrintOpts, output: &Output) {
 			} else {
 				println!("{}, {}", output.city, output.country);
 			}
+
+			// Show day indicator
+			if output.is_tomorrow {
+				println!("Tomorrow's weather");
+			} else {
+				println!("Today's weather");
+			}
+
 			println!("Temperature: {temp_display}{unit}");
 			println!("Feels like: {feels_like_display}{unit}");
 			println!("Humidity: {}%", output.humidity);
@@ -158,13 +167,25 @@ pub fn printer(opts: &PrintOpts, output: &Output) {
 				)
 			};
 			println!("{}", create_box_line(&city_info, 40, COLOURS[2]));
-			println!("{}", create_box_line("", 40, COLOURS[3]));
+
+			// Show day indicator (today/tomorrow)
+			let day_info = if output.is_tomorrow {
+				"Tomorrow".magenta()
+			} else {
+				"Today".magenta()
+			};
+			println!(
+				"{}",
+				create_box_line(&day_info.to_string(), 40, COLOURS[3])
+			);
+
+			println!("{}", create_box_line("", 40, COLOURS[4]));
 			println!(
 				"{}",
 				data_row(
 					"Temperature:",
 					&format!("{temp_display}{unit}"),
-					COLOURS[4]
+					COLOURS[5]
 				)
 			);
 			println!(
@@ -172,7 +193,7 @@ pub fn printer(opts: &PrintOpts, output: &Output) {
 				data_row(
 					"Feels like:",
 					&format!("{feels_like_display}{unit}"),
-					COLOURS[5]
+					COLOURS[6]
 				)
 			);
 			println!(
@@ -180,7 +201,7 @@ pub fn printer(opts: &PrintOpts, output: &Output) {
 				data_row(
 					"Humidity:",
 					&format!("{}%", output.humidity),
-					COLOURS[6]
+					COLOURS[7]
 				)
 			);
 			println!(
@@ -188,7 +209,7 @@ pub fn printer(opts: &PrintOpts, output: &Output) {
 				data_row(
 					"Weather:",
 					&format!("{:.15}", output.type_of.to_lowercase()),
-					COLOURS[7]
+					COLOURS[8]
 				)
 			);
 			println!(
@@ -196,10 +217,10 @@ pub fn printer(opts: &PrintOpts, output: &Output) {
 				data_row(
 					"Description:",
 					&format!("{:.15}", output.description),
-					COLOURS[8]
+					COLOURS[9]
 				)
 			);
-			println!("{}", create_box_line("", 40, COLOURS[9]));
+			println!("{}", create_box_line("", 40, COLOURS[10]));
 
 			let footer_content = if opts.header_footer.show_footer() {
 				" by github/jamesukiyo "
@@ -218,7 +239,7 @@ pub fn printer(opts: &PrintOpts, output: &Output) {
 						'─'
 					)
 				)
-				.truecolor(COLOURS[10].0, COLOURS[10].1, COLOURS[10].2)
+				.truecolor(COLOURS[11].0, COLOURS[11].1, COLOURS[11].2)
 			);
 		}
 	}

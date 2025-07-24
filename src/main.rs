@@ -8,7 +8,7 @@ mod config;
 mod fetch;
 mod printer;
 
-use args::Args;
+use args::{Args, Commands};
 use fetch::fetch_weather;
 use printer::printer;
 
@@ -26,6 +26,7 @@ struct Output {
 	type_of: String,
 	description: String,
 	icon: String,
+	is_tomorrow: bool,
 }
 
 enum HeaderFooter {
@@ -63,15 +64,45 @@ fn main() -> Result<()> {
 			.map_err(|_| eyre!("No API key specified!\nUse -k, OPEN_WEATHER_API_KEY in environment or set 'api_key' in ~/.config/sunny.toml"))?
 	};
 
-	// city: args > config
-	let city = if !args.city.is_empty() {
-		args.city.trim()
-	} else if !config.city.is_empty() {
-		config.city.trim()
-	} else {
-		return Err(eyre!(
-			"No city specified, use 'sunny <city>' or set 'city' in ~/.config/sunny.toml"
-		));
+	// city and determine if tmrw weather
+	let (city, is_tomorrow) = match &args.command {
+		Some(Commands::Tomorrow { city } | Commands::T { city }) => {
+			let city_name = if let Some(c) = city {
+				c.trim()
+			} else if !config.city.is_empty() {
+				config.city.trim()
+			} else {
+				return Err(eyre!(
+					"No city specified, use 'sunny tomorrow <city>' or set 'city' in ~/.config/sunny.toml"
+				));
+			};
+			(city_name, true)
+		}
+		Some(Commands::Today { city }) => {
+			let city_name = if let Some(c) = city {
+				c.trim()
+			} else if !config.city.is_empty() {
+				config.city.trim()
+			} else {
+				return Err(eyre!(
+					"No city specified, use 'sunny today <city>' or set 'city' in ~/.config/sunny.toml"
+				));
+			};
+			(city_name, false)
+		}
+		None => {
+			// work as originally
+			let city_name = if !args.city.is_empty() {
+				args.city.trim()
+			} else if !config.city.is_empty() {
+				config.city.trim()
+			} else {
+				return Err(eyre!(
+					"No city specified, use 'sunny <city>' or set 'city' in ~/.config/sunny.toml"
+				));
+			};
+			(city_name, false)
+		}
 	};
 
 	// fahrenheit: args > config
@@ -111,7 +142,7 @@ fn main() -> Result<()> {
 		use_icons,
 	};
 
-	let data = fetch_weather(city, api_key)?;
+	let data = fetch_weather(city, api_key, is_tomorrow)?;
 
 	let weather = data
 		.weather
@@ -128,6 +159,7 @@ fn main() -> Result<()> {
 		type_of: weather.main,
 		description: weather.description,
 		icon: weather.icon,
+		is_tomorrow,
 	};
 
 	printer(&print_opts, &output);

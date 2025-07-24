@@ -7,7 +7,7 @@
 </div>
 
 ## Features
-- check the current weather for any city
+- check the weather for any city today or tomorrow
 - fast (~130ms with fetch, sunny itself only takes 0.5 to 3ms depending on output style)
 - 3 output styles: fancy, simple, raw
 - fahrenheit support
@@ -48,7 +48,7 @@ See `example_config.toml` for an example.
 > CLI arguments will override corresponding config values.
 
 I recommend using the config file. Then you can run `sunny` without any
-arguments and see the weather quickly.
+arguments and see the weather quickly for today.
 
 It's also easier to override the city this way but still have a good default.
 ```sh
@@ -58,11 +58,29 @@ sunny paris  # allows override
 
 
 ### Run
+
+Examples:
+```sh
+sunny                   # today (city in config)
+sunny t                 # tomorrow (city in config)
+sunny paris             # today in paris
+sunny tomorrow paris    # tomorrow in paris
+sunny paris --simple    # today in paris, simple output
+sunny t paris --simple  # tomorrow in paris, simple output
 ```
-Usage: sunny [OPTIONS] [CITY]
+
+Full help:
+```
+Usage: sunny [OPTIONS] [CITY] [COMMAND]
+
+Commands:
+  today     Get today's weather (default)
+  tomorrow  Get tomorrow's weather
+  t         Short alias for tomorrow
+  help      Print this message or the help of the given subcommand(s)
 
 Arguments:
-  [CITY]  City to get the weather for (overrides config) [default: ]
+  [CITY]  City to get the weather for [default: ]
 
 Options:
   -s, --simple      Simpler output (no styling)

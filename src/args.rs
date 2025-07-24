@@ -1,10 +1,13 @@
-use clap::Parser;
+use clap::{Parser, Subcommand};
 
 #[allow(clippy::doc_markdown, clippy::struct_excessive_bools)]
 #[derive(Parser)]
 #[command(name = "sunny-rs")]
 #[command(about = "A project by github/jamesukiyo\n\nView the current weather from your terminal.", long_about = None)]
 pub struct Args {
+	#[command(subcommand)]
+	pub command: Option<Commands>,
+
 	/// City to get the weather for
 	#[arg(index = 1, default_value = "")]
 	pub city: String,
@@ -40,4 +43,23 @@ pub struct Args {
 	/// Disable icons - good for non-nerd fonts or lack of emoji support
 	#[arg(short = 'i', long = "no-icons")]
 	pub no_icons: bool,
+}
+
+#[derive(Subcommand)]
+pub enum Commands {
+	/// Get today's weather (default)
+	Today {
+		/// City to get weather for
+		city: Option<String>,
+	},
+	/// Get tomorrow's weather
+	Tomorrow {
+		/// City to get weather for
+		city: Option<String>,
+	},
+	/// Short alias for tomorrow
+	T {
+		/// City to get weather for
+		city: Option<String>,
+	},
 }
