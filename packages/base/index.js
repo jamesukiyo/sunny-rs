@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "child_process";
+import { createRequire } from "module";
+import path from "path";
+import fs from "fs";
+
+const require = createRequire(import.meta.url);
 
 /**
  * Returns the executable path which is located inside `node_modules`
@@ -33,12 +38,20 @@ function get_exe_path() {
 	}
 
 	try {
+		// try to resolve from installed platform package
 		return require.resolve(
 			`@jamesukiyo/sunny-cli-${os}-${arch}/sunny${extension}`,
 		);
 	} catch (e) {
+		// if it fails check if binary was placed directly in our directory
+		const __dirname = path.dirname(new URL(import.meta.url).pathname);
+		const local_bin_path = path.join(__dirname, `sunny${extension}`);
+		if (fs.existsSync(local_bin_path)) {
+			return local_bin_path;
+		}
+
 		throw new Error(
-			`Couldn't find application binary inside node_modules for ${os}-${arch}. Available packages should be named @jamesukiyo/sunny-cli-${os}-${arch}`,
+			`Couldn't find application binary for ${os}-${arch}. Make sure @jamesukiyo/sunny-cli-${os}-${arch} is installed or run 'npm install @jamesukiyo/sunny-cli-${os}-${arch}'`,
 		);
 	}
 }

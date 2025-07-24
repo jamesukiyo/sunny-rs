@@ -9,7 +9,8 @@
 		"weather"
 	],
 	"files": [
-		"index.js"
+		"index.js",
+		"postinstall.js"
 	],
 	"license": "MIT",
 	"bin": {
@@ -24,15 +25,8 @@
 		"url": "https://github.com/jamesukiyo/sunny-rs/issues"
 	},
 	"scripts": {
-		"dev": "node index.js"
-	},
-	"optionalDependencies": {
-		"@jamesukiyo/sunny-cli-linux-x64": "0.3.2",
-		"@jamesukiyo/sunny-cli-linux-arm64": "0.3.2",
-		"@jamesukiyo/sunny-cli-darwin-x64": "0.3.2",
-		"@jamesukiyo/sunny-cli-darwin-arm64": "0.3.2",
-		"@jamesukiyo/sunny-cli-windows-x64": "0.3.2",
-		"@jamesukiyo/sunny-cli-windows-arm64": "0.3.2"
+		"dev": "node index.js",
+		"postinstall": "node postinstall.js"
 	},
 	"publishConfig": {
 		"access": "public",
