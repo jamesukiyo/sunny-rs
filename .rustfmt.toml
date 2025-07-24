@@ -4,7 +4,8 @@ hard_tabs = true
 tab_spaces = 4
 newline_style = "Unix"
 use_try_shorthand = true
-wrap_comments = true
-imports_layout = "HorizontalVertical"
-group_imports = "StdExternalCrate"
-imports_granularity = "Module"
+# nightly features
+# wrap_comments = true
+# imports_layout = "HorizontalVertical"
+# group_imports = "StdExternalCrate"
+# imports_granularity = "Module"

@@ -33,7 +33,7 @@ jobs:
             - uses: actions/checkout@v4
             - uses: moonrepo/setup-rust@v1
               with:
-                  channel: nightly
+                  channel: stable
                   components: rustfmt
                   cache-base: "^master$"
             - run: cargo fmt --check
@@ -60,6 +60,6 @@ jobs:
     #         - uses: moonrepo/setup-rust@v1
     #           with:
     #               bins: cargo-nextest
-    #               channel: nightly
+    #               channel: stable
     #               cache-base: "^master$"
     #         - run: "cargo nextest run --workspace --no-tests=pass --retries=2"
