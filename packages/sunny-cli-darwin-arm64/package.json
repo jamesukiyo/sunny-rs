@@ -1,6 +1,6 @@
 {
 	"name": "@jamesukiyo/sunny-cli-darwin-arm64",
-	"version": "0.3.1",
+	"version": "0.3.2",
 	"author": "James Plummer <jamesp2001@live.co.uk>",
 	"description": "MacOS arm64 binary for sunny-cli.",
 	"keywords": [
