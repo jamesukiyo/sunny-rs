@@ -18,31 +18,34 @@ def main [--dry-run] {
     }
 
     print $"Updating version from ($current_version) to ($new_version)"
-    
+
     let cargo_content = (open Cargo.toml --raw | str replace $'version = "($current_version)"' $'version = "($new_version)"')
     $cargo_content | save -f Cargo.toml
     print "Updated Cargo.toml"
 
-    # Update all package.json files
-    let package_files = (glob "**/package.json" | sort)
-    for file in $package_files {
-        print $"Updating ($file)"
-        let package_content = (open $file --raw |
+    # Update npm package.json
+    let npm_package = "packages/npm/package.json"
+    if ($npm_package | path exists) {
+        print $"Updating ($npm_package)"
+        let package_content = (open $npm_package --raw | str replace $'"version": "($current_version)"' $'"version": "($new_version)"')
+        $package_content | save -f $npm_package
+    }
+
+    # Update scoop manifest
+    let scoop_manifest = "packages/scoop/sunny-cli.json"
+    if ($scoop_manifest | path exists) {
+        print $"Updating ($scoop_manifest)"
+        let scoop_content = (open $scoop_manifest --raw |
             str replace $'"version": "($current_version)"' $'"version": "($new_version)"' |
-            str replace $'"@jamesukiyo/sunny-cli-linux-x64": "($current_version)"' $'"@jamesukiyo/sunny-cli-linux-x64": "($new_version)"' |
-            str replace $'"@jamesukiyo/sunny-cli-linux-arm64": "($current_version)"' $'"@jamesukiyo/sunny-cli-linux-arm64": "($new_version)"' |
-            str replace $'"@jamesukiyo/sunny-cli-darwin-x64": "($current_version)"' $'"@jamesukiyo/sunny-cli-darwin-x64": "($new_version)"' |
-            str replace $'"@jamesukiyo/sunny-cli-darwin-arm64": "($current_version)"' $'"@jamesukiyo/sunny-cli-darwin-arm64": "($new_version)"' |
-            str replace $'"@jamesukiyo/sunny-cli-windows-x64": "($current_version)"' $'"@jamesukiyo/sunny-cli-windows-x64": "($new_version)"' |
-            str replace $'"@jamesukiyo/sunny-cli-windows-arm64": "($current_version)"' $'"@jamesukiyo/sunny-cli-windows-arm64": "($new_version)"'
+            str replace --all $'/download/v($current_version)/' $'/download/v($new_version)/'
         )
-        $package_content | save -f $file
+        $scoop_content | save -f $scoop_manifest
     }
 
     cargo check --quiet
 
     if not $dry_run {
-        git add Cargo.toml Cargo.lock ...$package_files
+        git add Cargo.toml Cargo.lock $npm_package $scoop_manifest
         git commit -m $"chore: release v($new_version)"
         git tag $"v($new_version)"
         git push origin HEAD

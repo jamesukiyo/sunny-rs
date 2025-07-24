@@ -29,6 +29,12 @@ bun install -g @jamesukiyo/sunny-cli
 pnpm install -g @jamesukiyo/sunny-cli
 ```
 
+With scoop:
+```sh
+scoop bucket add jamesukiyo https://github.com/jamesukiyo/sunny-rs
+scoop install sunny-cli
+```
+
 You will need a free API key from [OpenWeatherMap](https://openweathermap.org/api).
 
 A nerd font and terminal that supports emojis is recommended (see below).
@@ -69,7 +75,7 @@ sunny paris  # allows override
 
 ### Run
 
-For cargo installations:
+For cargo and scoop installations:
 ```sh
 sunny                   # today (city in config)
 sunny t                 # tomorrow (city in config)

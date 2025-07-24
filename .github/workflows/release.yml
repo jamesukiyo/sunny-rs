@@ -201,9 +201,56 @@ jobs:
 
                   publish_with_retry "npm-package"
 
+    update-scoop:
+        name: Update Scoop Manifest
+        needs: [build-cross-platform, lint]
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Download all binary artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  path: artifacts
+                  pattern: binary-*
+
+            - name: Create Windows release archives
+              run: |
+                  mkdir -p release-assets
+                  
+                  # Create Windows zip files for scoop
+                  for artifact_dir in artifacts/binary-windows-*; do
+                    platform=$(basename "$artifact_dir" | sed 's/binary-//')
+                    echo "Creating release archive for $platform"
+                    
+                    # Create zip from current directory pointing to artifact contents
+                    (cd "$artifact_dir" && zip -r "../../release-assets/sunny-cli-$platform.zip" *)
+                  done
+
+            - name: Update Scoop manifest hashes
+              run: |
+                  # Calculate hashes for Windows binaries
+                  HASH_X64=$(sha256sum release-assets/sunny-cli-windows-x64.zip | cut -d' ' -f1)
+                  HASH_ARM64=$(sha256sum release-assets/sunny-cli-windows-arm64.zip | cut -d' ' -f1)
+                  
+                  # Update hashes in manifest
+                  sed -i "0,/\"hash\": \"\"/{s/\"hash\": \"\"/\"hash\": \"$HASH_X64\"/}" packages/scoop/sunny-cli.json
+                  sed -i "0,/\"hash\": \"\"/{s/\"hash\": \"\"/\"hash\": \"$HASH_ARM64\"/}" packages/scoop/sunny-cli.json
+                  
+                  echo "Updated scoop manifest with hashes:"
+                  grep "hash" packages/scoop/sunny-cli.json
+
+            - name: Commit updated scoop manifest
+              run: |
+                  git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                  git config --local user.name "github-actions[bot]"
+                  git add packages/scoop/sunny-cli.json
+                  git commit -m "chore: update scoop manifest hashes for ${GITHUB_REF#refs/tags/}" || echo "No changes to commit"
+                  git push origin HEAD:master || echo "Failed to push scoop hash updates"
+
     github-release:
         name: Create GitHub Release
-        needs: [build-cross-platform, publish-cargo, publish-npm, lint]
+        needs: [build-cross-platform, publish-cargo, publish-npm, update-scoop, lint]
         permissions:
             contents: write
         runs-on: ubuntu-latest
@@ -225,17 +272,14 @@ jobs:
                     platform=$(basename "$artifact_dir" | sed 's/binary-//')
                     echo "Creating release archive for $platform"
 
-                    # Find the binary directory in this artifact
-                    binary_dir=$(find "$artifact_dir" -name "sunny-cli-*" -type d | head -n1)
-                    if [ -n "$binary_dir" ]; then
-                      cd "$binary_dir"
-                      if [[ "$platform" == *"windows"* ]]; then
-                        zip -r "../../release-assets/sunny-cli-$platform.zip" *
-                      else
-                        tar -czf "../../release-assets/sunny-cli-$platform.tar.gz" *
-                      fi
-                      cd - > /dev/null
+                    # Create archive directly from binary files
+                    cd "$artifact_dir"
+                    if [[ "$platform" == *"windows"* ]]; then
+                      zip -r "../release-assets/sunny-cli-$platform.zip" *
+                    else
+                      tar -czf "../release-assets/sunny-cli-$platform.tar.gz" *
                     fi
+                    cd - > /dev/null
                   done
 
             - uses: marvinpinto/action-automatic-releases@latest
