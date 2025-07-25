@@ -42,10 +42,20 @@ def main [--dry-run] {
         $scoop_content | save -f $scoop_manifest
     }
 
+    # Update homebrew formula
+    let homebrew_formula = "HomebrewFormula/sunny-cli.rb"
+    if ($homebrew_formula | path exists) {
+        print $"Updating ($homebrew_formula)"
+        let formula_content = (open $homebrew_formula --raw |
+            str replace --all $'/download/v($current_version)/' $'/download/v($new_version)/'
+        )
+        $formula_content | save -f $homebrew_formula
+    }
+
     cargo check --quiet
 
     if not $dry_run {
-        git add Cargo.toml Cargo.lock $npm_package $scoop_manifest
+        git add Cargo.toml Cargo.lock $npm_package $scoop_manifest $homebrew_formula
         git commit -m $"chore: release v($new_version)"
         git tag $"v($new_version)"
         git push origin HEAD
