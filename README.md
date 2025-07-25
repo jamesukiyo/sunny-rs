@@ -13,6 +13,7 @@
 - fahrenheit support
 - emojis or nerd font icons if supported
 - toml config file
+- install from multiple package managers
 
 ## Usage
 
@@ -35,9 +36,17 @@ scoop bucket add jamesukiyo https://github.com/jamesukiyo/sunny-rs
 scoop install sunny-cli
 ```
 
+With homebrew:
+```sh
+brew install jamesukiyo/sunny-rs/sunny-cli
+```
+
+### Setup
+
 You will need a free API key from [OpenWeatherMap](https://openweathermap.org/api).
 
-A nerd font and terminal that supports emojis is recommended (see below).
+A nerd font and terminal that supports emojis and true colour is recommended
+(see below).
 
 See the [#run](#run) section for info on how to use sunny.
 
