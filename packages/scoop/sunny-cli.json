@@ -1,15 +1,15 @@
 {
-	"version": "0.4.1",
+	"version": "0.5.0",
 	"description": "Check the weather from your terminal.",
 	"homepage": "https://github.com/jamesukiyo/sunny-rs",
 	"license": "MIT",
 	"architecture": {
 		"64bit": {
-			"url": "https://github.com/jamesukiyo/sunny-rs/releases/download/v0.4.1/sunny-cli-windows-x64.zip",
+			"url": "https://github.com/jamesukiyo/sunny-rs/releases/download/v0.5.0/sunny-cli-windows-x64.zip",
 			"hash": "447ba08441eeea2bdbe766663ee2383beaf0d8a2307590af25244924b3b5b0b4"
 		},
 		"arm64": {
-			"url": "https://github.com/jamesukiyo/sunny-rs/releases/download/v0.4.1/sunny-cli-windows-arm64.zip",
+			"url": "https://github.com/jamesukiyo/sunny-rs/releases/download/v0.5.0/sunny-cli-windows-arm64.zip",
 			"hash": "204127012a7620f9ef881a97699496f98394575b81aa7a1d7a5000948edc7b7d"
 		}
 	},
