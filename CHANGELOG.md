@@ -90,6 +90,23 @@
 [Changes][v0.4.1]
 
 
+<a id="v0.5.0"></a>
+## [v0.5.0](https://github.com/jamesukiyo/sunny-rs/releases/tag/v0.5.0) - 2025-07-27
+
+## Features
+- add option to disable color in output ([James Plummer](https://github.com/jamesukiyo/sunny-rs/commit/aab7d53d35473ee5252b10a193e7d2e6917cac59))
+
+## Documentation
+- add homebrew install to README ([James Plummer](https://github.com/jamesukiyo/sunny-rs/commit/012b2ff61775dc1ae35724e018bb4b7e0fa9aecd))
+
+## Chores
+- update package manifests for v0.4.1 ([github-actions[bot]](https://github.com/jamesukiyo/sunny-rs/commit/9bbc44922e20426f896ec3d57f0c0017931c3f82))
+- update changelog for v0.4.1 ([jamesukiyo](https://github.com/jamesukiyo/sunny-rs/commit/fd98985975d66cabb154d8554c02d4d3f0eccac9))
+- release v0.5.0 ([James Plummer](https://github.com/jamesukiyo/sunny-rs/commit/6dba1df3146b0b78041cd08de006b46c4e35462d))
+
+[Changes][v0.5.0]
+
+
 <a id="v0.4.1"></a>
 ## [v0.4.1](https://github.com/jamesukiyo/sunny-rs/releases/tag/v0.4.1) - 2025-07-25
 
@@ -217,7 +234,8 @@ trying to publish to npm, ignore this, there are no actual changes.
 [v0.4.1]: https://github.com/jamesukiyo/sunny-rs/compare/v0.4.1...v0.4.1
 [v0.4.1]: https://github.com/jamesukiyo/sunny-rs/compare/v0.4.1...v0.4.1
 [v0.4.1]: https://github.com/jamesukiyo/sunny-rs/compare/v0.4.1...v0.4.1
-[v0.4.1]: https://github.com/jamesukiyo/sunny-rs/compare/v0.4.1...v0.4.1
+[v0.4.1]: https://github.com/jamesukiyo/sunny-rs/compare/v0.5.0...v0.4.1
+[v0.5.0]: https://github.com/jamesukiyo/sunny-rs/compare/v0.4.1...v0.5.0
 [v0.4.1]: https://github.com/jamesukiyo/sunny-rs/compare/v0.4.0...v0.4.1
 [v0.4.0]: https://github.com/jamesukiyo/sunny-rs/compare/v0.3.3...v0.4.0
 [v0.3.3]: https://github.com/jamesukiyo/sunny-rs/compare/v0.3.2...v0.3.3
