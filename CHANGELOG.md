@@ -90,6 +90,23 @@
 [Changes][v0.4.1]
 
 
+<a id="v0.5.1"></a>
+## [v0.5.1](https://github.com/jamesukiyo/sunny-rs/releases/tag/v0.5.1) - 2025-07-27
+
+## Bug Fixes
+- prevent errors when missing config options ([James Plummer](https://github.com/jamesukiyo/sunny-rs/commit/ac75e48d237d69cb26553a9fe6a527c8920acc4d))
+
+## Continuous Integration
+- ignore tag pushes in normal push workflow ([James Plummer](https://github.com/jamesukiyo/sunny-rs/commit/b0cccc0add05dd5e2a94008cfc150c33bf742853))
+- revert ignore tag pushes ([James Plummer](https://github.com/jamesukiyo/sunny-rs/commit/98bdd352467f3d3b505ea054fc9a7b5f501fbcd7))
+
+## Chores
+- update changelog for v0.5.0 ([jamesukiyo](https://github.com/jamesukiyo/sunny-rs/commit/632170fcef8602c98d444dfedf1abfe5aaa02ef5))
+- release v0.5.1 ([James Plummer](https://github.com/jamesukiyo/sunny-rs/commit/f82096651fda9b58f301375bd21d308edcbb77de))
+
+[Changes][v0.5.1]
+
+
 <a id="v0.5.0"></a>
 ## [v0.5.0](https://github.com/jamesukiyo/sunny-rs/releases/tag/v0.5.0) - 2025-07-27
 
@@ -234,7 +251,8 @@ trying to publish to npm, ignore this, there are no actual changes.
 [v0.4.1]: https://github.com/jamesukiyo/sunny-rs/compare/v0.4.1...v0.4.1
 [v0.4.1]: https://github.com/jamesukiyo/sunny-rs/compare/v0.4.1...v0.4.1
 [v0.4.1]: https://github.com/jamesukiyo/sunny-rs/compare/v0.4.1...v0.4.1
-[v0.4.1]: https://github.com/jamesukiyo/sunny-rs/compare/v0.5.0...v0.4.1
+[v0.4.1]: https://github.com/jamesukiyo/sunny-rs/compare/v0.5.1...v0.4.1
+[v0.5.1]: https://github.com/jamesukiyo/sunny-rs/compare/v0.5.0...v0.5.1
 [v0.5.0]: https://github.com/jamesukiyo/sunny-rs/compare/v0.4.1...v0.5.0
 [v0.4.1]: https://github.com/jamesukiyo/sunny-rs/compare/v0.4.0...v0.4.1
 [v0.4.0]: https://github.com/jamesukiyo/sunny-rs/compare/v0.3.3...v0.4.0
