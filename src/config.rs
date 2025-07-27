@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 
 #[allow(clippy::struct_excessive_bools)]
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(default)]
 pub struct Config {
 	pub city: String,
 	pub api_key: String,
@@ -41,9 +42,29 @@ impl Config {
 			return Ok(default_config);
 		}
 
-		let content = fs::read_to_string(&config_path)?;
-		let config: Config = toml::from_str(&content)?;
-		Ok(config)
+		let content = fs::read_to_string(&config_path).map_err(|e| {
+			eyre!(
+				"Failed to read config file at {}: {}",
+				config_path.display(),
+				e
+			)
+		})?;
+
+		// fallback to default config
+		match toml::from_str(&content) {
+			Ok(config) => Ok(config),
+			Err(e) => {
+				eprintln!(
+					"Warning: Config file at {} has invalid syntax: {}",
+					config_path.display(),
+					e
+				);
+				eprintln!(
+					"Using default configuration. Fix the config file or delete it to regenerate."
+				);
+				Ok(Config::default())
+			}
+		}
 	}
 
 	pub fn save(&self) -> Result<()> {
