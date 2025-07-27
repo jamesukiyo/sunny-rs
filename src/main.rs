@@ -47,6 +47,7 @@ struct PrintOpts {
 	header_footer: HeaderFooter,
 	output_style: OutputStyle,
 	use_icons: bool,
+	use_colours: bool,
 }
 
 fn main() -> Result<()> {
@@ -113,8 +114,8 @@ fn main() -> Result<()> {
 		if args.clean_output || (args.no_header && args.no_footer) {
 			HeaderFooter::Clean
 		} else {
-			let show_header = !args.no_header && config.show_header;
-			let show_footer = !args.no_footer && config.show_footer;
+			let show_header = config.show_header && !args.no_header;
+			let show_footer = config.show_footer && !args.no_footer;
 
 			match (show_header, show_footer) {
 				(true, true) => HeaderFooter::Both,
@@ -133,13 +134,16 @@ fn main() -> Result<()> {
 		OutputStyle::Pretty
 	};
 
-	let use_icons = !args.no_icons || config.icons;
+	let use_icons = config.icons && !args.no_icons;
+
+	let use_colours = config.colours && !args.no_colors;
 
 	let print_opts = PrintOpts {
 		use_fahrenheit,
 		header_footer,
 		output_style,
 		use_icons,
+		use_colours,
 	};
 
 	let data = fetch_weather(city, api_key, is_tomorrow)?;

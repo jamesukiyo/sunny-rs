@@ -13,6 +13,7 @@ pub struct Config {
 	pub show_footer: bool,
 	pub show_header: bool,
 	pub icons: bool,
+	pub colours: bool,
 }
 
 impl Default for Config {
@@ -24,6 +25,7 @@ impl Default for Config {
 			show_footer: true,
 			show_header: true,
 			icons: true,
+			colours: true,
 		}
 	}
 }

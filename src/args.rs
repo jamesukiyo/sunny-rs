@@ -36,8 +36,12 @@ pub struct Args {
 	#[arg(short = 'H', long = "no-header")]
 	pub no_header: bool,
 
+	/// Disable colors - good for terminals without true colour support
+	#[arg(short = 'c', long = "no-colors")]
+	pub no_colors: bool,
+
 	/// Alias for --no-header --no-footer
-	#[arg(short = 'c', long = "clean")]
+	#[arg(short = 'C', long = "clean")]
 	pub clean_output: bool,
 
 	/// Disable icons - good for non-nerd fonts or lack of emoji support

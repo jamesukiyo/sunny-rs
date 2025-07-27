@@ -35,20 +35,35 @@ fn create_box_line(
 	content: &str,
 	width: usize,
 	colour: (u8, u8, u8),
-) -> impl std::fmt::Display {
-	format!("│{}│", pad_str(content, width, Alignment::Center, None))
-		.truecolor(colour.0, colour.1, colour.2)
+	use_colours: bool,
+) -> String {
+	let line =
+		format!("│{}│", pad_str(content, width, Alignment::Center, None));
+	if use_colours {
+		line.truecolor(colour.0, colour.1, colour.2).to_string()
+	} else {
+		line
+	}
 }
 
-fn data_row(label: &str, value: &str, colour: (u8, u8, u8)) -> String {
-	let l = "│   ".truecolor(colour.0, colour.1, colour.2);
-	let m = format!(
-		"{:12} {:>21}   ",
-		label.white(),
-		value.truecolor(colour.0, colour.1, colour.2)
-	);
-	let r = "│".truecolor(colour.0, colour.1, colour.2);
-	format!("{l}{m}{r}")
+fn data_row(
+	label: &str,
+	value: &str,
+	colour: (u8, u8, u8),
+	use_colours: bool,
+) -> String {
+	if use_colours {
+		let l = "│   ".truecolor(colour.0, colour.1, colour.2);
+		let m = format!(
+			"{:12} {:>21}   ",
+			label.white(),
+			value.truecolor(colour.0, colour.1, colour.2)
+		);
+		let r = "│".truecolor(colour.0, colour.1, colour.2);
+		format!("{l}{m}{r}")
+	} else {
+		format!("│   {label:12} {value:>21}   │")
+	}
 }
 
 #[allow(clippy::too_many_lines)]
@@ -111,81 +126,137 @@ pub fn printer(opts: &PrintOpts, output: &Output) {
 			}
 		}
 		OutputStyle::Pretty => {
+			// header section
 			if opts.header_footer.show_header() {
 				let header_content = if opts.use_icons {
-					format!(
-						" {} {} {} ",
-						Emoji("⛅", ""),
-						"sunny-rs".white(),
-						Emoji("⛅", "")
-					)
-				} else {
-					format!(" {} ", "sunny-rs".white())
-				};
-				println!(
-					"{}",
-					format!(
-						"┌{}┐",
-						pad_str_with(
-							&header_content,
-							40,
-							Alignment::Center,
-							None,
-							'─'
+					if opts.use_colours {
+						format!(
+							" {} {} {} ",
+							Emoji("⛅", ""),
+							"sunny-rs".white(),
+							Emoji("⛅", ""),
 						)
+					} else {
+						format!(
+							" {} sunny-rs {} ",
+							Emoji("⛅", ""),
+							Emoji("⛅", ""),
+						)
+					}
+				} else if opts.use_colours {
+					format!(" {} ", "sunny-rs".white())
+				} else {
+					" sunny-rs ".to_string()
+				};
+
+				let top_line = format!(
+					"┌{}┐",
+					pad_str_with(
+						&header_content,
+						40,
+						Alignment::Center,
+						None,
+						'─'
 					)
-					.truecolor(COLOURS[0].0, COLOURS[0].1, COLOURS[0].2)
 				);
+				if opts.use_colours {
+					println!(
+						"{}",
+						top_line.truecolor(
+							COLOURS[0].0,
+							COLOURS[0].1,
+							COLOURS[0].2
+						)
+					);
+				} else {
+					println!("{top_line}");
+				}
 			} else {
-				println!(
-					"{}",
-					format!(
-						"┌{}┐",
-						pad_str_with("", 40, Alignment::Center, None, '─')
-					)
-					.truecolor(COLOURS[0].0, COLOURS[0].1, COLOURS[0].2)
+				let top_line = format!(
+					"┌{}┐",
+					pad_str_with("", 40, Alignment::Center, None, '─')
 				);
+				if opts.use_colours {
+					println!(
+						"{}",
+						top_line.truecolor(
+							COLOURS[0].0,
+							COLOURS[0].1,
+							COLOURS[0].2
+						)
+					);
+				} else {
+					println!("{top_line}");
+				}
 			}
 
-			println!("{}", create_box_line("", 40, COLOURS[1]));
+			println!(
+				"{}",
+				create_box_line("", 40, COLOURS[1], opts.use_colours)
+			);
 
+			// city info
 			let city_info = if opts.use_icons {
-				format!(
-					"{}",
+				if opts.use_colours {
+					format!(
+						"{}",
+						format!(
+							"{}, {} {}",
+							output.city,
+							output.country,
+							Emoji(weather_icon, fallback_icon)
+						)
+						.blue()
+					)
+				} else {
 					format!(
 						"{}, {} {}",
 						output.city,
 						output.country,
 						Emoji(weather_icon, fallback_icon)
 					)
-					.blue()
-				)
-			} else {
+				}
+			} else if opts.use_colours {
 				format!(
 					"{}",
 					format!("{}, {}", output.city, output.country).blue()
 				)
-			};
-			println!("{}", create_box_line(&city_info, 40, COLOURS[2]));
-
-			// Show day indicator (today/tomorrow)
-			let day_info = if output.is_tomorrow {
-				"Tomorrow".magenta()
 			} else {
-				"Today".magenta()
+				format!("{}, {}", output.city, output.country)
 			};
 			println!(
 				"{}",
-				create_box_line(&day_info.to_string(), 40, COLOURS[3])
+				create_box_line(&city_info, 40, COLOURS[2], opts.use_colours)
 			);
 
-			println!("{}", create_box_line("", 40, COLOURS[4]));
+			// day indicator
+			let day_info = if opts.use_colours {
+				if output.is_tomorrow {
+					"Tomorrow".magenta().to_string()
+				} else {
+					"Today".magenta().to_string()
+				}
+			} else if output.is_tomorrow {
+				"Tomorrow".to_string()
+			} else {
+				"Today".to_string()
+			};
+			println!(
+				"{}",
+				create_box_line(&day_info, 40, COLOURS[3], opts.use_colours)
+			);
+
+			println!(
+				"{}",
+				create_box_line("", 40, COLOURS[4], opts.use_colours)
+			);
 			println!(
 				"{}",
 				data_row(
 					"Temperature:",
 					&format!("{temp_display}{unit}"),
-					COLOURS[5]
+					COLOURS[5],
+					opts.use_colours
 				)
 			);
 			println!(
@@ -193,7 +264,8 @@ pub fn printer(opts: &PrintOpts, output: &Output) {
 				data_row(
 					"Feels like:",
 					&format!("{feels_like_display}{unit}"),
-					COLOURS[6]
+					COLOURS[6],
+					opts.use_colours
 				)
 			);
 			println!(
@@ -201,7 +273,8 @@ pub fn printer(opts: &PrintOpts, output: &Output) {
 				data_row(
 					"Humidity:",
 					&format!("{}%", output.humidity),
-					COLOURS[7]
+					COLOURS[7],
+					opts.use_colours
 				)
 			);
 			println!(
@@ -209,7 +282,8 @@ pub fn printer(opts: &PrintOpts, output: &Output) {
 				data_row(
 					"Weather:",
 					&format!("{:.15}", output.type_of.to_lowercase()),
-					COLOURS[8]
+					COLOURS[8],
+					opts.use_colours
 				)
 			);
 			println!(
@@ -217,30 +291,37 @@ pub fn printer(opts: &PrintOpts, output: &Output) {
 				data_row(
 					"Description:",
 					&format!("{:.15}", output.description),
-					COLOURS[9]
+					COLOURS[9],
+					opts.use_colours
 				)
 			);
-			println!("{}", create_box_line("", 40, COLOURS[10]));
+			println!(
+				"{}",
+				create_box_line("", 40, COLOURS[10], opts.use_colours)
+			);
 
+			// footer
 			let footer_content = if opts.header_footer.show_footer() {
 				" by github/jamesukiyo "
 			} else {
 				""
 			};
-			println!(
-				"{}",
-				format!(
-					"└{}┘",
-					pad_str_with(
-						footer_content,
-						40,
-						Alignment::Center,
-						None,
-						'─'
-					)
-				)
-				.truecolor(COLOURS[11].0, COLOURS[11].1, COLOURS[11].2)
+			let bottom_line = format!(
+				"└{}┘",
+				pad_str_with(footer_content, 40, Alignment::Center, None, '─')
 			);
+			if opts.use_colours {
+				println!(
+					"{}",
+					bottom_line.truecolor(
+						COLOURS[11].0,
+						COLOURS[11].1,
+						COLOURS[11].2
+					)
+				);
+			} else {
+				println!("{bottom_line}");
+			}
 		}
 	}
 }

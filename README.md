@@ -12,6 +12,7 @@
 - 3 output styles: fancy, simple, raw
 - fahrenheit support
 - emojis or nerd font icons if supported
+- true colour output if supported
 - toml config file
 - install from multiple package managers
 
@@ -61,11 +62,15 @@ Inside it you can set the following:
 - `show_footer`: whether to show the footer [default: true]
 - `show_header`: whether to show the header [default: true]
 - `icons`: whether to enable nerd font and emoji icons [default: true]
+- `colours`: whether to enable colors [default: true]
 
 > [!IMPORTANT]
 > If icons are enabled, an emoji is tried first if supported and then a nerd
 > font icon. If neither work, the layout may be incorrect so try disabling icons
-> or trying a nerd font.
+> or using a nerd font.
+>
+> If colours are enabled, the terminal must support true colour. If not, the
+> output will be incorrect so try disabling colours.
 
 See `example_config.toml` for an example.
 
@@ -122,7 +127,8 @@ Options:
   -f, --fahrenheit  Use fahrenheit for temperature
   -F, --no-footer   Hide the credits footer from output
   -H, --no-header   Hide the header from output
-  -c, --clean       Alias for --no-header --no-footer
+  -c, --no-colors   Disable colors - good for terminals without true colour support
+  -C, --clean       Alias for --no-header --no-footer
   -i, --no-icons    Disable icons - good for non-nerd fonts or lack of emoji support
   -h, --help        Print help
 ```
